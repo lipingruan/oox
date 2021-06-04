@@ -151,7 +151,16 @@ module.exports = class SocketIOServer {
 
         const socketServer = this.socketServer = new SocketIO.Server ( this.server, this.genOptions ( ) )
 
-        socketServer.on ( 'connection', this.onSocketConnection.bind ( this ) )
+        socketServer.on ( 'connection', async socket => {
+
+            try {
+
+                await this.onSocketConnection ( socket )
+            } catch ( error ) {
+
+                socket.send ( error.message ).disconnect ( true )
+            }
+        } )
     }
 
 
@@ -164,29 +173,16 @@ module.exports = class SocketIOServer {
 
         const headers = socket.handshake.headers
 
+        const callerId = headers [ 'x-caller-id' ] || socket.id
+
+        // 已经存在相同的连接
+        if ( Global.sockets.has ( callerId ) ) throw new Error ( 'Connection Exists' )
+
         // client ip or caller service ip
         const ip = headers [ 'x-real-ip' ] || headers [ 'x-ip' ] || socket.handshake.address
 
         // service name
         const caller = headers [ 'x-caller' ] || 'anonymous'
-
-        const callerId = headers [ 'x-caller-id' ] || socket.id
-
-        // 已经存在相同的连接
-        if ( Global.sockets.has ( callerId ) ) {
-
-            const oldSocket = Global.sockets.get ( callerId )
-
-            if ( oldSocket.data.connected ) {
-
-                return socket.send ( 'Connection Exists' ).disconnect ( true )
-            } else {
-
-                Global.sockets.delete ( callerId )
-
-                oldSocket.disconnect ( true )
-            }
-        }
 
         socket.data = { connected: true, host: ip, name: caller, id: callerId, owner: this.name }
 
