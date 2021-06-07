@@ -7,6 +7,40 @@ const argv = require ( './argv' )
 
 
 
+/**
+ * x.y=1 => { x: { y: 1 } }
+ * @param {*} env 
+ */
+function mergeFlatEnv ( env ) {
+
+    for ( const key of Object.keys ( env ) ) {
+
+        // x.y.z
+        if ( key.includes ( '.' ) && !key.startsWith ( '.' ) && !key.endsWith ( '.' ) ) {
+
+            const subKeys = key.split ( '.' )
+
+            const valueKey = subKeys.pop ( )
+
+            let tmpEnv = env
+
+            for ( subKey of subKeys ) {
+
+                if ( subKey in tmpEnv ) { } else {
+
+                    tmpEnv [ subKey ] = { }
+                }
+
+                tmpEnv = tmpEnv [ subKey ]
+            }
+
+            tmpEnv [ valueKey ] = env [ key ]
+        }
+    }
+}
+
+
+
 exports.configure = ( ) => {
 
     let env = Object.create ( null )
@@ -28,6 +62,8 @@ exports.configure = ( ) => {
     }
 
     Object.assign ( env, argv.getAllEnvArgs ( ) )
+
+    mergeFlatEnv ( env )
 
     if ( 'string' === typeof env.ignore ) env.ignore = env.ignore.split ( ',' )
 
