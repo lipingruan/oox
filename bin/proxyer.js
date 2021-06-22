@@ -14,16 +14,16 @@ var Service = require ( '../service/service.class' )
  */
  function rewriteModuleCache ( id, exports ) {
 
-    const path = id.split ( '/' ).slice ( 0, -1 ).join ( '/' )
+    const pathname = id.split ( path.sep ).slice ( 0, -1 ).join ( path.sep )
 
-    const pathSplit = path.split ( '/' )
+    const pathSplit = pathname.split ( path.sep )
 
-    const paths = pathSplit.map ( ( v, i, a ) => a.slice ( 0, i + 1 ).concat ( 'node_modules' ).join ( '/' ) ).reverse ( )
+    const paths = pathSplit.map ( ( v, i, a ) => a.slice ( 0, i + 1 ).concat ( 'node_modules' ).join ( path.sep ) ).reverse ( )
 
     const m = new module.constructor ( )
 
     m.id = id
-    m.path = path
+    m.path = pathname
     m.exports = exports
     m.filename = m.id
     m.loaded = true
@@ -70,7 +70,7 @@ exports.proxyServices = ( servicesDirectory, excludes = [ ] ) => {
 
     for ( const filename of subs ) {
 
-        const fullPath = path.resolve ( directory + '/' + filename )
+        const fullPath = path.resolve ( directory + path.sep + filename )
 
         const stat = fs.statSync ( fullPath )
 

@@ -27,7 +27,7 @@ function getEntryFile ( ) {
 
     const filename = path.basename ( fullPath )
 
-    const directory = path.dirname ( fullPath ).split ( '/' ).pop ( )
+    const directory = path.dirname ( fullPath ).split ( path.sep ).pop ( )
 
     var name = filename === 'index.js' ? directory : filename.split ( '.js' ) [ 0 ]
 
