@@ -103,7 +103,7 @@ module.exports = class RPC extends RPCInterface {
 
         try {
 
-            const result = await OOXTrace [ traceId ] ( action, params, context )
+            const result = await OOXTrace [ traceId ] ( action, [ ...params ], context )
 
             format.body = result
 
