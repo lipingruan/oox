@@ -30,6 +30,15 @@ module.exports = class SocketIO extends RPCSocketIO {
 
             fn ( data )
         } )
+
+        socket.on ( 'fetchActions', async ( search, fn ) => {
+
+            if ( 'function' !== typeof fn ) return
+
+            const data = this.constructor.onFetchActions ( socket, search )
+
+            fn ( data )
+        } )
     }
 
 
@@ -76,6 +85,15 @@ module.exports = class SocketIO extends RPCSocketIO {
         Global.socketIORegistry.add ( socket.data.name, socket.data.id )
 
         socket.emit ( 'syncConnection', socketDatas => this.onSyncConnection ( socket, socketDatas ) )
+
+        socket.on ( 'fetchActions', async ( search, fn ) => {
+
+            if ( 'function' !== typeof fn ) return
+            
+            const actions = this.onFetchActions ( socket, search )
+
+            fn ( actions )
+        } )
     }
 
 
@@ -99,5 +117,27 @@ module.exports = class SocketIO extends RPCSocketIO {
         for ( const socketData of socketDatas )
             if ( !Global.sockets.has ( socketData.id ) )
                 this.connect ( socketData.id, socket.data.owner ).catch ( error => console.error ( error ) )
+    }
+
+
+
+    /**
+     * 
+     * @param {Socket} socket 
+     * @param {String} search 
+     * @returns {String[]}
+     */
+    static onFetchActions ( socket, search ) {
+
+        const data = [ ]
+
+        const [ service ] = Global.instances.filter ( service => service.name === socket.data.owner )
+
+        if ( !service ) return data
+
+        for ( const key of service.kvMethods.keys ( ) )
+            if ( key.includes ( search ) ) data.push ( key )
+        
+        return data
     }
 }

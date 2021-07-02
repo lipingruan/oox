@@ -36,6 +36,29 @@ module.exports = class Service extends RPC {
 
 
 
+    static async emit ( name, action, params, context ) {
+
+        if ( !context || !context.traceId ) {
+
+            let trace = { }
+
+            Error.captureStackTrace ( trace )
+
+            context = Global.genContextByStack ( trace.stack )
+        }
+
+        const socketIONodes = Global.socketIORegistry.get ( name )
+
+        if ( socketIONodes.length ) {
+
+            const node = this.selectSocketIONode ( socketIONodes )
+
+            return this.SocketIO.emit ( node, action, params, context )
+        } else throw new Error ( 'No running service as ' + name )
+    }
+
+
+
     /**
      * 
      * @param {string[]} nodes 

@@ -149,13 +149,13 @@ module.exports = class SocketIOModule extends SocketIOClient {
 
 
     /**
-     * HTTP RPC
+     * RPC emit
      * @param {String} url
      * @param {String} action 函数名称
      * @param {[]} params 参数列表
      * @param {Context} context 上下文
      */
-     static async call ( url, action, params, context ) {
+     static async emit ( url, action, params, context ) {
 
         if ( !context || !context.traceId ) {
 
@@ -189,26 +189,42 @@ module.exports = class SocketIOModule extends SocketIOClient {
                 // RPC 执行时中断连接
                 socket.once ( 'disconnect', onError )
 
-                socket.emit ( 'call', action, params, context, format => {
+                socket.emit ( action, ...params, format => {
 
                     socket.off ( 'disconnect', onError )
 
-                    const { error, body } = format
-
-                    if ( error ) {
-
-                        const asyncError = new Error ( error.message )
-        
-                        reject ( asyncError )
-                    } else {
-        
-                        resolve ( body )
-                    }
+                    resolve ( format )
                 } )
             } )
         } catch ( error ) {
 
             throw new Error ( error.message )
         }
+    }
+
+
+
+    /**
+     * HTTP RPC
+     * @param {String} url
+     * @param {String} action 函数名称
+     * @param {[]} params 参数列表
+     * @param {Context} context 上下文
+     */
+     static async call ( url, action, params, context ) {
+
+        if ( !context || !context.traceId ) {
+
+            let trace = { }
+
+            Error.captureStackTrace ( trace )
+
+            context = Global.genContextByStack ( trace.stack )
+        }
+
+        const { error, body } = await this.emit ( url, 'call', [ action, params, context ], context )
+
+        if ( error ) throw new Error ( error.message )
+        else return body
     }
 }
