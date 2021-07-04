@@ -59,6 +59,20 @@ module.exports = class Service extends RPC {
 
 
 
+    static async proxyCall ( name, action, params, context ) {
+
+        return await this.emit ( name, 'proxyCall', [ action, params, context ], context )
+    }
+
+
+
+    static async proxyCallById ( id, action, params, context ) {
+
+        return this.SocketIO.emit ( id, 'proxyCall', [ action, params, context ], context )
+    }
+
+
+
     /**
      * 
      * @param {string[]} nodes 

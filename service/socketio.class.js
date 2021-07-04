@@ -3,6 +3,8 @@ const RPCSocketIO = require ( '../rpc/socketio.class' )
 
 const Socket = require ( '../socketio/socket.class' )
 
+const Context = require ( '../rpc/context.class' )
+
 const Global = require ( '../global' )
 
 
@@ -35,9 +37,16 @@ module.exports = class SocketIO extends RPCSocketIO {
 
             if ( 'function' !== typeof fn ) return
 
-            const data = this.constructor.onFetchActions ( socket, search )
+            const data = await this.constructor.onFetchActions ( socket, search )
 
             fn ( data )
+        } )
+
+        socket.on ( 'proxyCall', async ( id, action, params, context, fn ) => {
+
+            const result = await this.constructor.onProxyCall ( socket, id, action, params, context )
+
+            if ( 'function' === typeof fn ) fn ( result )
         } )
     }
 
@@ -90,9 +99,16 @@ module.exports = class SocketIO extends RPCSocketIO {
 
             if ( 'function' !== typeof fn ) return
             
-            const actions = this.onFetchActions ( socket, search )
+            const actions = await this.onFetchActions ( socket, search )
 
             fn ( actions )
+        } )
+
+        socket.on ( 'proxyCall', async ( id, action, params, context, fn ) => {
+
+            const result = await this.onProxyCall ( socket, id, action, params, context )
+
+            if ( 'function' === typeof fn ) fn ( result )
         } )
     }
 
@@ -139,5 +155,37 @@ module.exports = class SocketIO extends RPCSocketIO {
             if ( key.includes ( search ) ) data.push ( key )
         
         return data
+    }
+
+
+
+    /**
+     * 
+     * @param {Socket} socket 
+     * @param {String} id 
+     * @param {String} action 
+     * @param {Context} contextPrev
+     * @param {[]} params 
+     */
+    static async onProxyCall ( socket, id, action, params, contextPrev ) {
+
+        const context = new Context ( )
+
+        context.traceId = contextPrev.traceId
+        context.sourceIP = socket.data.host
+
+        try {
+
+            return await this.emit ( id, 'call', [ action, params, context ], context )
+        } catch ( error ) {
+
+            return {
+                success: false,
+                error: {
+                    message: error.message,
+                    stack: error.stack
+                }
+            }
+        }
     }
 }
