@@ -128,7 +128,7 @@ module.exports = class SocketIOModule extends SocketIOClient {
 
         const format = await this.rpc.call ( action, params, context )
 
-        callback ( format )
+        'function' === typeof callback && callback ( format )
     }
 
 
