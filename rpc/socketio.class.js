@@ -110,7 +110,8 @@ module.exports = class SocketIOModule extends SocketIOClient {
 
         const connectionContext = {
             ip: socket.data.host,
-            caller: socket.data.name
+            caller: socket.data.name,
+            callerId: socket.data.id,
         }
 
         socket.on ( 'call', async ( action, params, context, callback ) => {

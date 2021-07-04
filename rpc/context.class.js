@@ -10,4 +10,6 @@ module.exports = class Context {
     traceId = ''
     // 请求者名称
     caller = ''
+    // 请求者ID (长连接专用)
+    callerId = ''
 }
