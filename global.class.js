@@ -71,7 +71,7 @@ module.exports = class Global {
      * 获取链路跟踪上下文
      * @param {Context} param0 
      */
-    genContext ( { caller, traceId, ip, sourceIP } = { } ) {
+    genContext ( { caller, callerId, traceId, ip, sourceIP } = { } ) {
 
         const context = new Context ( )
 
@@ -88,6 +88,7 @@ module.exports = class Global {
         context.traceId = traceId || this.genTraceId ( )
         context.ip = ip
         context.sourceIP = sourceIP || ip
+        context.callerId = callerId
 
         return context
     }
