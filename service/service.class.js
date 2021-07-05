@@ -61,6 +61,15 @@ module.exports = class Service extends RPC {
 
     static async proxyCallById ( id, targetId, action, params, context ) {
 
+        if ( !context || !context.traceId ) {
+
+            let trace = { }
+
+            Error.captureStackTrace ( trace )
+
+            context = Global.genContextByStack ( trace.stack )
+        }
+
         return this.SocketIO.emit ( id, 'proxyCall', [ targetId, action, params, context ], context )
     }
 
