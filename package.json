@@ -1,6 +1,6 @@
 {
   "name": "oox",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "distributed api service",
   "main": "index.js",
   "bin": {
