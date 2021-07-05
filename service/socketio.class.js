@@ -169,14 +169,11 @@ module.exports = class SocketIO extends RPCSocketIO {
      */
     static async onProxyCall ( socket, id, action, params, contextPrev ) {
 
-        const context = new Context ( )
-
-        context.traceId = contextPrev.traceId
-        context.sourceIP = socket.data.host
+        const context = Global.genContext ( contextPrev )
 
         try {
 
-            return await this.emit ( id, 'call', [ action, params, context ], context )
+            return await this.call ( id, action, params, context )
         } catch ( error ) {
 
             return {
