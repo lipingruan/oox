@@ -152,7 +152,7 @@ module.exports = class SocketIO extends RPCSocketIO {
         if ( !service ) return data
 
         for ( const key of service.kvMethods.keys ( ) )
-            if ( key.includes ( search ) ) data.push ( key )
+            if ( !key.endsWith ( '_proxy' ) && key.includes ( search ) ) data.push ( key )
         
         return data
     }
