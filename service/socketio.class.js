@@ -41,13 +41,6 @@ module.exports = class SocketIO extends RPCSocketIO {
 
             fn ( data )
         } )
-
-        socket.on ( 'proxyCall', async ( id, action, params, context, fn ) => {
-
-            const result = await this.constructor.onProxyCall ( socket, id, action, params, context )
-
-            if ( 'function' === typeof fn ) fn ( result )
-        } )
     }
 
 
@@ -103,13 +96,6 @@ module.exports = class SocketIO extends RPCSocketIO {
 
             fn ( actions )
         } )
-
-        socket.on ( 'proxyCall', async ( id, action, params, context, fn ) => {
-
-            const result = await this.onProxyCall ( socket, id, action, params, context )
-
-            if ( 'function' === typeof fn ) fn ( result )
-        } )
     }
 
 
@@ -155,34 +141,5 @@ module.exports = class SocketIO extends RPCSocketIO {
             if ( !key.endsWith ( '_proxy' ) && key.includes ( search ) ) data.push ( key )
         
         return data
-    }
-
-
-
-    /**
-     * 
-     * @param {Socket} socket 
-     * @param {String} id 
-     * @param {String} action 
-     * @param {Context} contextPrev
-     * @param {[]} params 
-     */
-    static async onProxyCall ( socket, id, action, params, contextPrev ) {
-
-        const context = Global.genContext ( contextPrev )
-
-        try {
-
-            return await this.call ( id, action, params, context )
-        } catch ( error ) {
-
-            return {
-                success: false,
-                error: {
-                    message: error.message,
-                    stack: error.stack
-                }
-            }
-        }
     }
 }
