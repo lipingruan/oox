@@ -3,8 +3,6 @@ const { genOOXTrace } = require ( '../util' )
 
 const Context = require ( './context.class' )
 
-if ( Error.stackTraceLimit < 20 ) Error.stackTraceLimit = 20
-
 const HTTP = require ( './http.class' )
 
 const SocketIO = require ( './socketio.class' )

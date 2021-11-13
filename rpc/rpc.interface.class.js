@@ -7,8 +7,6 @@ const Context = require ( './context.class' )
 
 const Config = require ( './config.class' )
 
-if ( Error.stackTraceLimit < 20 ) Error.stackTraceLimit = 20
-
 
 
 module.exports = class RPC extends EventEmitter {

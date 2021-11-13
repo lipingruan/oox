@@ -5,6 +5,10 @@ const RPC = require ( '../rpc/rpc.class' )
 
 const SocketIO = require ( './socketio.class' )
 
+const Context = require ( '../rpc/context.class' )
+
+
+
 module.exports = class Service extends RPC {
 
 
@@ -13,6 +17,14 @@ module.exports = class Service extends RPC {
 
 
 
+    /**
+     * 
+     * @param {String} name 
+     * @param {String} action 
+     * @param {Array} params 
+     * @param {Context} context 
+     * @returns 
+     */
     static async call ( name, action, params, context ) {
 
         if ( !context || !context.traceId ) {
