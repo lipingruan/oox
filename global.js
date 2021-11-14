@@ -11,9 +11,15 @@ const Socket = require ( './socketio/socket.class' )
 
 const SetMap = require ( './setMap.class' )
 
+const Middleware = require ( './middleware' )
+
 
 
 const Global = {
+
+
+
+    md: Middleware.handler,
 
 
 

@@ -9,6 +9,8 @@ const querystring = require('querystring')
 
 const Context = require  ( './rpc/context.class' )
 
+const Middleware = require ( './middleware' )
+
 
 
 exports.getIPAddress = function ( version = 4 ) {
@@ -208,7 +210,12 @@ exports.genKVMethods = function ( methods, kvMethods=new Map(), nameStack=[] ) {
     
     if ( 'function' === typeof val ) {
 
-      kvMethods.set ( nameStack.concat ( key ).join ( '.' ), val.bind ( methods )  )
+      const action = nameStack.concat ( key ).join ( '.' )
+
+      // 中間件函數脫殼綁定
+      Middleware.wrappedActions.set ( action, val )
+
+      kvMethods.set ( action, val.bind ( methods ) )
     } else {
 
       exports.genKVMethods ( val, kvMethods, nameStack.concat ( key ) )
@@ -345,7 +352,21 @@ exports.genOOXTrace = function ( traceId, methods ) {
 
 
     // make sure target action execute after all proxies
-    if ( target ) return await target ( ...params )
+    if ( target ) {
+
+      const sourceMethod = Middleware.wrappedActions.get ( action )
+
+      const middlewareNames = Middleware.actionMiddlewares.get ( sourceMethod )
+
+      if ( middlewareNames && middlewareNames.length ) for ( const name of middlewareNames ) {
+
+        const middleware = Middleware.middlewares.get ( name )
+
+        await middleware ( action, params, context )
+      }
+      
+      return await target ( ...params )
+    }
   }
 
   return OOXTrace
