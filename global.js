@@ -1,7 +1,7 @@
 
 if ( Error.stackTraceLimit < 20 ) Error.stackTraceLimit = 20
 
-const { getTraceIdByStack } = require ( './util' )
+const { AsyncLocalStorage } = require ( 'async_hooks' )
 
 const Context = require ( './rpc/context.class' )
 
@@ -19,6 +19,10 @@ const Global = {
 
 
 
+    asyncStore: new AsyncLocalStorage ( ),
+
+
+
     md: Middleware.handler,
 
 
@@ -27,14 +31,6 @@ const Global = {
      * @type {[RPC]}
      */
     instances: [ ],
-
-
-
-    /**
-     * all contexts map
-     * @type {Map<String,Context>}
-     */
-    contexts: new Map ( ),
 
 
 
@@ -106,34 +102,13 @@ const Global = {
 
     /**
      * 
-     * @param {String} stack 
      * @returns {Context}
      */
-    genContextByStack ( stack ) {
+    getContext ( ) {
 
-        if ( !stack ) {
+        const context = this.asyncStore.getStore ( )
 
-            let trace = { }
-
-            Error.captureStackTrace ( trace )
-
-            stack = trace.stack
-        }
-
-        const traceId = getTraceIdByStack ( stack )
-
-        if ( traceId ) {
-
-            const sourceContext = this.contexts.get ( traceId )
-
-            if ( sourceContext ) {
-
-                return this.genContext ( { traceId, sourceIP: sourceContext.sourceIP } )
-            } else {
-
-                return this.genContext ( { traceId } )
-            }
-        } else return this.genContext ( )
+        return context || this.genContext ( )
     },
 }
 

@@ -29,11 +29,7 @@ module.exports = class Service extends RPC {
 
         if ( !context || !context.traceId ) {
 
-            let trace = { }
-
-            Error.captureStackTrace ( trace )
-
-            context = Global.genContextByStack ( trace.stack )
+            context = Global.getContext ( )
         }
 
         const socketIONodes = Global.socketIORegistry.get ( name )
@@ -52,11 +48,7 @@ module.exports = class Service extends RPC {
 
         if ( !context || !context.traceId ) {
 
-            let trace = { }
-
-            Error.captureStackTrace ( trace )
-
-            context = Global.genContextByStack ( trace.stack )
+            context = Global.getContext ( )
         }
 
         const socketIONodes = Global.socketIORegistry.get ( name )

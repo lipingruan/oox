@@ -160,11 +160,7 @@ module.exports = class SocketIOModule extends SocketIOClient {
 
         if ( !context || !context.traceId ) {
 
-            let trace = { }
-
-            Error.captureStackTrace ( trace )
-
-            context = Global.genContextByStack ( trace.stack )
+            context = Global.getContext ( )
         }
 
         /**
@@ -216,11 +212,7 @@ module.exports = class SocketIOModule extends SocketIOClient {
 
         if ( !context || !context.traceId ) {
 
-            let trace = { }
-
-            Error.captureStackTrace ( trace )
-
-            context = Global.genContextByStack ( trace.stack )
+            context = Global.getContext ( )
         }
 
         const { error, body } = await this.emit ( url, 'call', [ action, params, context ], context )

@@ -1,7 +1,7 @@
 
 const http = require ( 'http' )
 
-const { parseHTTPBody, getTraceIdByStack, getIPAddress, httpRequest } = require ( '../util' )
+const { parseHTTPBody, getIPAddress, httpRequest } = require ( '../util' )
 
 const Context = require ( './context.class' )
 
@@ -238,17 +238,6 @@ module.exports = class HTTPModule {
 
         let formatString = ''
 
-        if ( format instanceof Error ) {
-
-            format = {
-                success: false,
-                error: {
-                    message: format.message,
-                    stack: format.stack
-                }
-            }
-        }
-
         try {
 
             formatString = JSON.stringify ( format )
@@ -286,11 +275,7 @@ module.exports = class HTTPModule {
 
         if ( !context || !context.traceId ) {
 
-            let trace = { }
-
-            Error.captureStackTrace ( trace )
-
-            context = Global.genContextByStack ( trace.stack )
+            context = Global.getContext ( )
         }
 
         const { traceId, caller, sourceIP } = context
