@@ -15,7 +15,7 @@ const register = require ( './register' )
 
 
 
-function getEntryFile ( ) {
+function getEntryFile ( env ) {
 
     const args = process.argv.slice ( 2 )
 
@@ -27,11 +27,15 @@ function getEntryFile ( ) {
 
     const filename = path.basename ( fullPath )
 
-    const directory = path.dirname ( fullPath ).split ( path.sep ).pop ( )
+    const fullDirectory = path.dirname ( fullPath )
 
-    var name = filename === 'index.js' ? directory : filename.split ( '.js' ) [ 0 ]
+    const directory = fullDirectory.split ( path.sep ).pop ( )
 
-    return { name, path: fullPath }
+    const groupFullDirectory = env.group ? path.resolve ( env.group ) : ''
+
+    var name = filename === 'index.js' && groupFullDirectory !== fullDirectory ? directory : filename.split ( '.js' ) [ 0 ]
+
+    return { name, path: fullPath, group: groupFullDirectory }
 }
 
 
@@ -86,7 +90,7 @@ exports.startup = async ( ) => {
 
 
     // 获取服务入口地址
-    const entryFile = getEntryFile ( )
+    const entryFile = getEntryFile ( env )
 
     // 代理<服务间调用>
     if ( env.group ) {
@@ -95,7 +99,7 @@ exports.startup = async ( ) => {
 
         if ( Array.isArray ( env.ignore ) ) excludes.push ( ...env.ignore )
 
-        proxyer.proxyServices ( env.group, excludes )
+        proxyer.proxyServices ( entryFile.group, excludes )
     }
 
     // 加载服务
