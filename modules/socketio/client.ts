@@ -3,13 +3,9 @@ import * as SocketIOClient from 'socket.io-client'
 
 import { ClientSocket as Socket, sockets } from './socket'
 
-import SocketIOServer, { SocketIOConfig } from './server'
+import SocketIOServer from './server'
 
 import * as oox from '../../index'
-
-
-
-export { SocketIOConfig }
 
 
 

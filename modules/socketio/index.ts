@@ -3,11 +3,17 @@ import SocketIOClient from './client'
 
 import * as oox from '../../index'
 
-import { Socket, sockets, addGroupSocket, removeGroupSocket, ServerSocket, ClientSocket, SocketData } from './socket'
+import { Socket, sockets, addGroupSocket, removeGroupSocket, ServerSocket, ClientSocket, SocketData, socketGroups, getGroupSockets } from './socket'
 
 
 
 export default class SocketIOModule extends SocketIOClient {
+
+
+
+    sockets = sockets
+
+    getGroupSockets = getGroupSockets
 
 
 
@@ -64,6 +70,28 @@ export default class SocketIOModule extends SocketIOClient {
             if ( !key.endsWith ( '_proxy' ) && key.includes ( search ) ) data.push ( key )
         
         return data
+    }
+
+
+
+    fetchActions ( url: string, search?: string ): Promise<SocketData[]> 
+
+    fetchActions ( name: string, search?: string ): Promise<SocketData[]>
+
+    fetchActions ( arg0: string, search = '' ): Promise<SocketData[]> {
+
+        let socket = sockets.get ( arg0 )
+
+        if ( !socket ) {
+
+            const group = socketGroups.get ( arg0 )
+
+            if ( !group || !group.size ) throw new Error ( `Unknown service identify<${arg0}>` )
+
+            socket = group.values ( ).next ( ).value
+        }
+
+        return <Promise<SocketData[]>>this.emit ( socket.data.id, 'fetchActions', [ search ] )
     }
 
 

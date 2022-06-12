@@ -182,7 +182,7 @@ export default class SocketIOServer extends Module {
 
         socket.on ( 'disconnect', reason => this.serverOnSocketDisconnect ( socket, reason ) )
 
-        socket.emit ( 'oox_connected', { name: this.name } )
+        socket.emit ( 'oox_connected', { name: oox.config.name } )
 
         this.serverOnConnection ( socket )
     }

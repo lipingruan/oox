@@ -60,9 +60,7 @@ export const socketGroups = new Map<string,Set<Socket>>()
 
 export function addGroupSocket ( socket: Socket ) {
 
-    const { id, name } = socket.data
-
-    sockets.set ( id, socket )
+    const { name } = socket.data
 
     if ( socketGroups.has ( name ) ) {
 
@@ -81,7 +79,11 @@ export function removeGroupSocket ( socket: Socket ) {
 
     if ( socketGroups.has ( name ) ) {
 
-        socketGroups.get ( name ).delete ( socket )
+        const group = socketGroups.get ( name )
+
+        group.delete ( socket )
+
+        if ( !group.size ) socketGroups.delete ( name )
     }
 }
 
@@ -92,8 +94,6 @@ export function getGroupSockets ( name: string ) {
     if ( !socketGroups.has ( name ) ) {
 
         const group:Set<Socket> = new Set ( )
-
-        socketGroups.set ( name, group )
 
         return group
     }
