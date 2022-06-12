@@ -1,0 +1,19 @@
+{
+    "files": [
+        "index.ts"
+    ],
+    "include": [
+    ],
+    "buildOptions": {
+        "force": true
+    },
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "CommonJS",
+        "strict": false,
+        "experimentalDecorators": true,
+        "outDir": "build",
+        "declaration": true,
+        "declarationDir": "build/types"
+    }
+}

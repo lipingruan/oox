@@ -1,17 +1,41 @@
 {
-  "name": "oox",
-  "version": "0.2.0",
-  "description": "distributed api service",
-  "main": "index.js",
-  "bin": {
-    "oox": "bin/cli.js"
-  },
-  "author": "lipingruan",
-  "homepage": "https://github.com/lipingruan/oox",
-  "license": "MIT",
-  "dependencies": {
-    "chalk": "^4.1.0",
-    "socket.io": "^4.4.0",
-    "socket.io-client": "^4.4.0"
-  }
+    "name": "oox",
+    "version": "0.3.0",
+    "description": "Graceful NodeJS distributed application solution",
+    "keywords": [
+        "http",
+        "socket.io",
+        "rpc",
+        "microservice",
+        "distributed",
+        "tracing"
+    ],
+    "type": "commonjs",
+    "main": "build/index.js",
+    "types": "build/types/index.d.ts",
+    "exports": {
+        "require": "./build/index.js",
+        "import": "./build/index.mjs",
+        "types": "./build/types/index.d.ts"
+    },
+    "bin": {
+        "oox": "bin/cli.js"
+    },
+    "scripts": {
+        "build": "node scripts/build.js"
+    },
+    "author": "lipingruan",
+    "homepage": "https://github.com/lipingruan/oox",
+    "license": "MIT",
+    "dependencies": {
+        "chalk": "^4.1.0",
+        "socket.io": "^4.4.0",
+        "socket.io-client": "^4.4.0"
+    },
+    "devDependencies": {
+        "typescript": "^4.7.3"
+    },
+    "engines": {
+        "node": ">=12.0.0"
+    }
 }
