@@ -147,7 +147,7 @@ export default class SocketIOServer extends Module {
 
             try {
 
-                this.onSocketConnection(socket)
+                this.serverOnSocketConnection(socket)
             } catch ( error ) {
 
                 socket.send ( error.message ).disconnect ( true )
@@ -160,7 +160,7 @@ export default class SocketIOServer extends Module {
     /**
      * 服务端Socket连接事件
      */
-    onSocketConnection ( socket: Socket ) {
+    serverOnSocketConnection ( socket: Socket ) {
 
         const headers = socket.handshake.headers
 
@@ -180,16 +180,16 @@ export default class SocketIOServer extends Module {
         // 保存 callerId 与 socket 对应关系
         sockets.set ( callerId, socket )
 
-        socket.on ( 'disconnect', reason => this.onSocketDisconnect ( socket, reason ) )
+        socket.on ( 'disconnect', reason => this.serverOnSocketDisconnect ( socket, reason ) )
 
         socket.emit ( 'oox_connected', { name: this.name } )
 
-        this.onConnection ( socket )
+        this.serverOnConnection ( socket )
     }
 
 
 
-    onConnection ( socket: Socket ) { }
+    serverOnConnection ( socket: Socket ) { }
 
 
 
@@ -198,16 +198,16 @@ export default class SocketIOServer extends Module {
      * @param {Socket} socket 
      * @param {Error} reason
      */
-    onSocketDisconnect ( socket: Socket, reason: string ) {
+    serverOnSocketDisconnect ( socket: Socket, reason: string ) {
 
         socket.data.connected = false
 
         sockets.delete ( socket.data.id )
 
-        this.onDisconnect ( socket, reason )
+        this.serverOnDisconnect ( socket, reason )
     }
 
 
 
-    onDisconnect ( socket: Socket, reason: string ) { }
+    serverOnDisconnect ( socket: Socket, reason: string ) { }
 }

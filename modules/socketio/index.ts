@@ -24,9 +24,9 @@ export default class SocketIOModule extends SocketIOClient {
 
 
     
-    onDisconnect ( socket: ServerSocket, reason: string ) {
+    serverOnDisconnect ( socket: ServerSocket, reason: string ) {
 
-        super.onDisconnect ( socket, reason )
+        super.serverOnDisconnect ( socket, reason )
 
         removeGroupSocket ( socket )
     }
@@ -68,32 +68,15 @@ export default class SocketIOModule extends SocketIOClient {
 
 
 
-    /**
-     * 
-     * @param {Socket} socket 
-     */
-    onConnection ( socket: ServerSocket ) {
+    onConnection ( socket: Socket ) {
 
-        super.onConnection ( socket )
-
-        socket.setMaxListeners ( 0 )
+        addGroupSocket ( socket )
 
         const connectionContext: oox.Context = {
             ip: socket.data.host,
             caller: socket.data.name,
             callerId: socket.data.id,
         }
-
-        addGroupSocket ( socket )
-
-        socket.on ( 'syncConnection', async (fn: (arg0: any[]) => void) => {
-
-            if ( 'function' !== typeof fn ) return
-
-            const data = this.onSyncConnection ( socket )
-
-            fn ( data )
-        } )
 
         socket.on ( 'fetchActions', async ( search: any, fn: (arg0: any) => void ) => {
 
@@ -115,6 +98,30 @@ export default class SocketIOModule extends SocketIOClient {
 
 
 
+    /**
+     * 
+     * @param {Socket} socket 
+     */
+    serverOnConnection ( socket: ServerSocket ) {
+
+        super.serverOnConnection ( socket )
+
+        socket.setMaxListeners ( 0 )
+
+        socket.on ( 'syncConnection', async (fn: (arg0: any[]) => void) => {
+
+            if ( 'function' !== typeof fn ) return
+
+            const data = this.onSyncConnection ( socket )
+
+            fn ( data )
+        } )
+
+        this.onConnection ( socket )
+    }
+
+
+
     async call ( action: string, params: any[], context: oox.Context, callback?: (returns: any) => void ) {
 
         const returns = await oox.call ( action, params, context )
@@ -130,26 +137,15 @@ export default class SocketIOModule extends SocketIOClient {
 
         super.clientOnConnection ( socket )
 
-        socket.on ( 'call', this.call.bind ( this ) )
-
-        addGroupSocket ( socket )
-
         socket.emit ( 'syncConnection', (socketDatas: any) => this.clientOnSyncConnection ( socket, socketDatas ) )
 
-        socket.on ( 'fetchActions', async ( search: any, fn: (arg0: any[]) => void ) => {
-
-            if ( 'function' !== typeof fn ) return
-            
-            const actions = await this.onFetchActions ( socket, search )
-
-            fn ( actions )
-        } )
+        this.onConnection ( socket )
     }
 
 
 
     /**
-     * RPC emit
+     * socketio emit
      */
      async emit ( url: string, action: string, params: any[] ) {
 
@@ -194,7 +190,7 @@ export default class SocketIOModule extends SocketIOClient {
 
 
     /**
-     * RPC call
+     * RPC
      */
      async rpc ( url: string, action: string, params: [], context?: oox.Context ) {
 
