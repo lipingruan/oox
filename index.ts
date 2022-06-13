@@ -31,13 +31,13 @@ export const {
 
 export class Context extends app.Context {
     // 请求溯源IP
-    sourceIP? = ''
+    sourceIP = ''
     // 请求者IP
     ip = ''
     // 请求者名称
     caller = 'anonymous'
     // 请求者ID (长连接专用)
-    callerId? = ''
+    callerId = ''
 }
 
 
@@ -55,7 +55,7 @@ export const config = new Config ( )
 
 
 
-let genTraceIdFunction: () => string = function ( ) {
+let genTraceIdFunction = ( ) => {
 
     const uid = [ 
         Math.floor ( Date.now ( ) / 1000 ).toString ( 16 ),

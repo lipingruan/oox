@@ -56,7 +56,7 @@ export default class SocketIOCore extends SocketIOServer {
         // create socket handler
         const mURL = new URL ( url )
 
-        socket = SocketIOClient.io ( mURL.origin, {
+        socket = <Socket>SocketIOClient.io ( mURL.origin, {
             extraHeaders: headers,
             path: mURL.pathname
         } )

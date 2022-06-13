@@ -41,7 +41,7 @@ export interface ServerSocket extends _ServerSocket {
 
 
 export interface ClientSocket extends _ClientSocket {
-    data?: Partial<SocketData>
+    data: Partial<SocketData>
 }
 
 

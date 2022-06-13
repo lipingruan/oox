@@ -24,16 +24,17 @@ if ( fs.existsSync ( outDir ) ) {
 
 
 // copy package.json
+delete package.private
 delete package.scripts
 delete package.devDependencies
 fs.writeFileSync ( 
-    'build/package.json', 
+    'dist/package.json', 
     JSON.stringify ( package, null, 4 )
-        .replace ( /("|\.\/)build\//g, '$1' ) 
+        .replace ( /("|\.\/)dist\//g, '$1' ) 
 )
 
 
-// copy files to build directory
+// copy files to dist directory
 const copyFiles = [
     'README.md',
     'LICENSE',
@@ -42,7 +43,7 @@ const copyFiles = [
 
 for ( const copyFile of copyFiles ) {
 
-    fs.copyFileSync ( copyFile, 'build/' + copyFile )
+    fs.copyFileSync ( copyFile, 'dist/' + copyFile )
 }
 
 require ( 'typescript/lib/tsc' )

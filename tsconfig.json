@@ -12,8 +12,8 @@
         "module": "CommonJS",
         "strict": false,
         "experimentalDecorators": true,
-        "outDir": "build",
+        "outDir": "dist",
         "declaration": true,
-        "declarationDir": "build/types"
+        "declarationDir": "dist/types"
     }
 }

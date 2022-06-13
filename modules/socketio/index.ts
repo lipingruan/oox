@@ -101,6 +101,7 @@ export default class SocketIOModule extends SocketIOClient {
         addGroupSocket ( socket )
 
         const connectionContext: oox.Context = {
+            sourceIP: '',
             ip: socket.data.host,
             caller: socket.data.name,
             callerId: socket.data.id,

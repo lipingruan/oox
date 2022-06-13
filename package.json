@@ -1,5 +1,6 @@
 {
     "name": "oox",
+    "private": true,
     "version": "0.3.0",
     "description": "Graceful NodeJS distributed application solution",
     "keywords": [
@@ -11,12 +12,12 @@
         "tracing"
     ],
     "type": "commonjs",
-    "main": "build/index.js",
-    "types": "build/types/index.d.ts",
+    "main": "dist/index.js",
+    "types": "dist/types/index.d.ts",
     "exports": {
-        "require": "./build/index.js",
-        "import": "./build/index.mjs",
-        "types": "./build/types/index.d.ts"
+        "require": "./dist/index.js",
+        "import": "./dist/index.mjs",
+        "types": "./dist/types/index.d.ts"
     },
     "bin": {
         "oox": "bin/cli.js"

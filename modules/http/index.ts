@@ -188,7 +188,7 @@ export default class HTTPModule extends Module {
     
         const { action, params = [ ] } = body
     
-        const context = oox.genContext ( { traceId, caller, sourceIP, ip } )
+        const context = oox.genContext ( { traceId, caller, sourceIP, ip, callerId: '' } )
     
         const format = await oox.call ( action, params, context )
     
