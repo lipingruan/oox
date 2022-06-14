@@ -3,7 +3,7 @@ import * as http from 'http'
 
 import { Server, ServerOptions } from 'socket.io'
 
-import Module from '../module'
+import Module, { ModuleConfig } from '../module'
 
 import { ServerSocket as Socket, sockets } from './socket'
 
@@ -11,7 +11,7 @@ import * as oox from '../../index'
 
 
 
-export class SocketIOConfig {
+export class SocketIOConfig extends ModuleConfig {
     // listen port
     port = 0
     // service path
@@ -143,7 +143,7 @@ export default class SocketIOServer extends Module {
 
         const socketServer = this.socketServer = new Server ( this.server, this.genSocketIOServerOptions ( ) )
 
-        socketServer.on ( 'connection', async socket => {
+        socketServer.on ( 'connection', async (socket: Socket) => {
 
             try {
 
@@ -175,7 +175,7 @@ export default class SocketIOServer extends Module {
         // service name
         const caller = String ( headers [ 'x-caller' ] || 'anonymous' )
 
-        socket.data = { connected: true, host: ip, name: caller, id: callerId, owner: oox.config.name }
+        socket.data = { connected: true, host: ip, name: caller, id: callerId }
 
         // 保存 callerId 与 socket 对应关系
         sockets.set ( callerId, socket )

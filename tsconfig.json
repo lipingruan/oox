@@ -1,6 +1,7 @@
 {
     "files": [
-        "index.ts"
+        "index.ts",
+        "bin/cli.ts"
     ],
     "include": [
     ],
@@ -14,6 +15,7 @@
         "experimentalDecorators": true,
         "outDir": "dist",
         "declaration": true,
-        "declarationDir": "dist/types"
+        "declarationDir": "dist/types",
+        "resolveJsonModule": true
     }
 }

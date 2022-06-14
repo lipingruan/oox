@@ -5,11 +5,11 @@ import { httpRequest, parseHTTPBody } from './utils'
 
 import * as oox from '../../index'
 
-import Module from '../module'
+import Module, { ModuleConfig } from '../module'
 
 
 
-export class HTTPConfig {
+export class HTTPConfig extends ModuleConfig {
     // listen port
     port = 0
     // service path

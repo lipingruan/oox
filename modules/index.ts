@@ -1,4 +1,6 @@
 
+import * as path from 'node:path'
+
 import Module from './module'
 
 import HTTP from './http'
@@ -90,18 +92,6 @@ export default class Modules extends Module {
     
 
 
-    setConfig ( ) {
-
-    }
-
-
-
-    getConfig ( ) {
-
-    }
-
-
-
     async serve ( ) {
 
         try {
@@ -117,14 +107,24 @@ export default class Modules extends Module {
 
                     let isShareServer = false
 
+                        // 都没设置端口
                         isShareServer = !httpConfig.port && !socketioConfig.port
+                        // 都设置相同端口
+                        isShareServer = isShareServer || httpConfig.port === socketioConfig.port
+                        // http 模块未被禁用
+                        isShareServer = isShareServer && !httpConfig.disabled
 
-                        isShareServer ||= httpConfig.port === socketioConfig.port
+                    if ( isShareServer ) {
 
-                    if ( isShareServer ) _socketio.server = _http.server
+                        socketioConfig.path = path.posix.join ( httpConfig.path, socketioConfig.path )
+                        _socketio.server = _http.server
+                    }
                 }
 
-                await module.serve ( )
+                if ( !module.getConfig ( ).disabled ) {
+
+                    await module.serve ( )
+                }
             }
         } catch ( error ) {
 

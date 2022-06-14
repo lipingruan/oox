@@ -2,18 +2,17 @@
 import SocketIOClient from './client'
 
 import * as oox from '../../index'
+import { RPCKeepAliveConnectionData, RPCKeepAliveConnection, RPCConnectionAdapter, keepAliveConnections, removeKeepAliveConnection, addKeepAliveConnection, getKeepAliveConnections, getKeepAliveConnection } from '../../index'
 
-import { Socket, sockets, addGroupSocket, removeGroupSocket, ServerSocket, ClientSocket, SocketData, socketGroups, getGroupSockets } from './socket'
+import { Socket, sockets, ServerSocket, ClientSocket } from './socket'
 
 
 
-export default class SocketIOModule extends SocketIOClient {
+export default class SocketIOModule extends SocketIOClient implements RPCConnectionAdapter {
 
 
 
     sockets = sockets
-
-    getGroupSockets = getGroupSockets
 
 
 
@@ -34,7 +33,7 @@ export default class SocketIOModule extends SocketIOClient {
 
         super.serverOnDisconnect ( socket, reason )
 
-        removeGroupSocket ( socket )
+        removeKeepAliveConnection ( socket.data.name, socket.data.id )
     }
 
 
@@ -43,7 +42,7 @@ export default class SocketIOModule extends SocketIOClient {
 
         super.clientOnDisconnect ( socket, reason )
 
-        removeGroupSocket ( socket )
+        removeKeepAliveConnection ( socket.data.name, socket.data.id )
     }
 
 
@@ -51,13 +50,13 @@ export default class SocketIOModule extends SocketIOClient {
     /**
      * 
      * @param socket 是由哪个通道发送过来的
-     * @param socketDatas 
+     * @param connectionDatas 
      */
-    clientOnSyncConnection ( socket: Socket, socketDatas: SocketData[] ) {
+    clientOnSyncConnection ( socket: Socket, connectionDatas: RPCKeepAliveConnectionData[] ) {
 
-        for ( const socketData of socketDatas )
-            if ( !sockets.has ( socketData.id ) )
-                this.connect ( socketData.id ).catch ( (error: any) => console.error ( error ) )
+        for ( const data of connectionDatas )
+            if ( !sockets.has ( data.id ) )
+                this.connect ( data.id ).catch ( (error: any) => console.error ( error ) )
     }
 
 
@@ -74,37 +73,41 @@ export default class SocketIOModule extends SocketIOClient {
 
 
 
-    fetchActions ( url: string, search?: string ): Promise<SocketData[]> 
+    fetchActions ( url: string, search?: string ): Promise<RPCKeepAliveConnectionData[]> 
+    fetchActions ( name: string, search?: string ): Promise<RPCKeepAliveConnectionData[]>
+    fetchActions ( id: string, search = '' ): Promise<RPCKeepAliveConnectionData[]> {
 
-    fetchActions ( name: string, search?: string ): Promise<SocketData[]>
-
-    fetchActions ( arg0: string, search = '' ): Promise<SocketData[]> {
-
-        let socket = sockets.get ( arg0 )
+        let socket = sockets.get ( id )
 
         if ( !socket ) {
 
-            const group = socketGroups.get ( arg0 )
+            const connections = getKeepAliveConnections ( id )
 
-            if ( !group || !group.size ) throw new Error ( `Unknown service identify<${arg0}>` )
+            if ( !connections || !connections.size ) throw new Error ( `Unknown service identify<${id}>` )
 
-            socket = group.values ( ).next ( ).value
+            id = connections.keys ( ).next ( ).value
+
+            socket = sockets.get ( id )
         }
 
-        return <Promise<SocketData[]>>this.emit ( socket.data.id, 'fetchActions', [ search ] )
+        if ( !socket ) throw new Error ( `Unknown service identify<${id}>` )
+
+        return <Promise<RPCKeepAliveConnectionData[]>>this.emit ( socket.data.id, 'fetchActions', [ search ] )
     }
 
 
 
     onConnection ( socket: Socket ) {
 
-        addGroupSocket ( socket )
+        const { id, name, host } = socket.data
+
+        addKeepAliveConnection ( new RPCKeepAliveConnection ( this, id, socket.data ) )
 
         const connectionContext: oox.Context = {
             sourceIP: '',
-            ip: socket.data.host,
-            caller: socket.data.name,
-            callerId: socket.data.id,
+            ip: host,
+            caller: name,
+            callerId: id,
         }
 
         socket.on ( 'fetchActions', async ( search: any, fn: (arg0: any) => void ) => {

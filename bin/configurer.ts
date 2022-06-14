@@ -1,17 +1,16 @@
 
-const fs = require ( 'fs' )
+import * as fs from 'node:fs'
 
-const path = require ( 'path' )
+import * as path from 'node:path'
 
-const argv = require ( './argv' )
+import * as argv from './argv'
 
 
 
 /**
  * x.y=1 => { x: { y: 1 } }
- * @param {*} env 
  */
-function mergeFlatEnv ( env ) {
+function mergeFlatEnv ( env: { [x: string]: any } ) {
 
     for ( const key of Object.keys ( env ) ) {
 
@@ -24,7 +23,7 @@ function mergeFlatEnv ( env ) {
 
             let tmpEnv = env
 
-            for ( subKey of subKeys ) {
+            for ( const subKey of subKeys ) {
 
                 if ( subKey in tmpEnv ) { } else {
 
@@ -41,7 +40,7 @@ function mergeFlatEnv ( env ) {
 
 
 
-exports.configure = ( ) => {
+export function configure ( ) {
 
     let env = Object.create ( null )
 

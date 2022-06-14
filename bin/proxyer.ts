@@ -1,70 +1,68 @@
 
-const fs = require ( 'fs' )
+import * as fs from 'node:fs'
 
-const path = require ( 'path' )
+import * as path from 'node:path'
 
-var Service = require ( '../service/service.class' )
+import * as oox from '../index'
+
+import { Module } from 'node:module'
 
 
 
 /**
  * 重写 require 缓存
- * @param {String} id 
- * @param {*} exports 
  */
- function rewriteModuleCache ( id, exports ) {
+ function rewriteModuleCache ( id: string, exports: any ) {
 
     const pathname = id.split ( path.sep ).slice ( 0, -1 ).join ( path.sep )
 
     const pathSplit = pathname.split ( path.sep )
 
-    const paths = pathSplit.map ( ( v, i, a ) => a.slice ( 0, i + 1 ).concat ( 'node_modules' ).join ( path.sep ) ).reverse ( )
+    const paths = pathSplit.map ( ( v: string, i: number, a: string[] ) => a.slice ( 0, i + 1 ).concat ( 'node_modules' ).join ( path.sep ) ).reverse ( )
 
-    const m = new module.constructor ( )
+    const m = new Module ( id, null )
 
-    m.id = id
     m.path = pathname
     m.exports = exports
     m.filename = m.id
     m.loaded = true
     m.children = [ ]
     m.paths = paths
-    m.parent = null
 
     require.cache [ id ] = m
 }
 
 
 
-function dotCall ( name, paths = [ ] ) {
+function dotCall ( name: string, paths: string[] = [ ] ) {
 	
 	return new Proxy ( function ( ) { }, {
 
-        get ( target, key ) {
+        get ( target, key: string ) {
 
 			return dotCall ( name, paths.concat ( key ) )
 		},
 		
 		has ( target, key ) { return true },
 		
-		apply ( target, thisObject, args ) {
+		apply ( target, thisArg, args ) {
 
-            return Service.call ( name, paths.join ( '.' ), args )
+            return oox.rpc ( name, paths.join ( '.' ), args )
 		}
 	} )
 }
 
 
 
-exports.proxyServices = ( servicesDirectory, excludes = [ ] ) => {
+export function proxyGroup ( groupDirectory: string, excludes = [ ] ) {
 
-    if ( !servicesDirectory ) return
+    if ( !groupDirectory ) return
 
-    const directory = path.resolve ( servicesDirectory )
+    const directory = path.resolve ( groupDirectory )
 
     const stat = fs.statSync ( directory )
 
-    if ( !stat.isDirectory ( ) ) throw new Error ( 'services must be directory' )
+    if ( !stat.isDirectory ( ) ) throw new Error ( 'group must be directory' )
 
     const subs = fs.readdirSync ( directory )
 
@@ -89,7 +87,3 @@ exports.proxyServices = ( servicesDirectory, excludes = [ ] ) => {
         if ( !excludes.includes ( name ) ) rewriteModuleCache ( id, dotCall ( name ) )
     }
 }
-
-
-
-exports.setService = serviceClazz => Service = serviceClazz

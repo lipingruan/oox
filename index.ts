@@ -3,7 +3,7 @@ import * as app from './app'
 
 import { getIPAddress } from './utils'
 
-import Module from './modules/module'
+import Module, { ModuleConfig } from './modules/module'
 
 import Modules from './modules'
 
@@ -11,7 +11,7 @@ import Modules from './modules'
 
 
 export { ReturnsBody } from './app'
-export { Module }
+export { Module, ModuleConfig }
 export const modules = new Modules
 
 
@@ -52,6 +52,12 @@ export class Config {
 
 
 export const config = new Config ( )
+
+
+
+export function getConfig ( ) {
+
+}
 
 
 
@@ -129,16 +135,106 @@ export interface RPCConnectionAdapter {
 
 
 
-export class RPCKeepAliveConnection {
+export interface RPCKeepAliveConnectionData {
 
-    nativeConnection: any = null
+    /**
+     * 是否连接成功
+     */
+    connected: boolean
 
-    adapter: RPCConnectionAdapter = null
+    /**
+     * 连接主机地址
+     */
+    host: string
+
+    /**
+     * 连接服务名称
+     */
+    name: string
+
+    /**
+     * 目标服务网络唯一ID
+     */
+    id: string
 }
 
 
 
-export const keepAliveConnections: Map<string,RPCKeepAliveConnection[]> = new Map ( )
+export class RPCKeepAliveConnection {
+
+    data: RPCKeepAliveConnectionData
+
+    nativeConnection: any = null
+
+    adapter: RPCConnectionAdapter = null
+
+    constructor ( adapter: RPCConnectionAdapter, nativeConnection: any, data?: RPCKeepAliveConnectionData ) {
+        
+        this.adapter = adapter
+        this.nativeConnection = nativeConnection
+
+        if ( data ) this.data = data
+    }
+}
+
+
+
+export const keepAliveConnections: Map<string,Map<string,RPCKeepAliveConnection>> = new Map ( )
+
+
+
+export function getKeepAliveConnections ( name: string ): Map<string,RPCKeepAliveConnection>|null {
+
+    return keepAliveConnections.get ( name ) || null
+}
+
+
+
+export function getKeepAliveConnection ( name: string, id: string ): RPCKeepAliveConnection|null {
+
+    const connections = keepAliveConnections.get ( name )
+
+    if ( !connections ) return null
+
+    return connections.get ( id )
+}
+
+
+
+export function addKeepAliveConnection ( connection: RPCKeepAliveConnection ) {
+
+    const { name, id } = connection.data
+
+    if ( keepAliveConnections.has ( name ) ) {
+
+        keepAliveConnections.get ( name ).set ( id, connection )
+    } else {
+
+        keepAliveConnections.set ( name, new Map ( [ [ id, connection ] ] ) )
+    }
+}
+
+
+
+export function removeKeepAliveConnection ( connection: RPCKeepAliveConnection ): void
+export function removeKeepAliveConnection ( name: string, id: string ): void
+export function removeKeepAliveConnection ( name: string|RPCKeepAliveConnection, id?: string ): void {
+
+    if ( name instanceof RPCKeepAliveConnection ) {
+
+        id = name.data.id
+        name = name.data.name
+    }
+
+    if ( keepAliveConnections.has ( name ) ) {
+
+        const group = keepAliveConnections.get ( name )
+
+        group.delete ( id )
+
+        if ( !group.size ) keepAliveConnections.delete ( name )
+    }
+}
 
 
 
@@ -151,9 +247,9 @@ export async function rpc ( appName: string, action: string, params: any[], cont
 
     const connections = keepAliveConnections.get ( appName )
 
-    if ( !connections || !connections.length ) throw new Error ( `Connection<${appName}> not found` )
+    if ( !connections || !connections.size ) throw new Error ( `Connection<${appName}> not found` )
 
-    const connection = connections [ 0 ]
+    const connection: RPCKeepAliveConnection = connections.values ( ).next ( ).value
 
     return connection.adapter.rpc ( connection.nativeConnection, action, params, context )
 }

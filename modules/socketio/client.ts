@@ -61,7 +61,7 @@ export default class SocketIOCore extends SocketIOServer {
             path: mURL.pathname
         } )
 
-        socket.data = { connected: false, id: url, host: mURL.host, owner: oox.config.name }
+        socket.data = { name: 'anonymous', connected: false, id: url, host: mURL.host }
 
         sockets.set ( url, socket )
 
