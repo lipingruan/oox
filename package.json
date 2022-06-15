@@ -11,7 +11,7 @@
         "distributed",
         "tracing"
     ],
-    "type": "commonjs",
+    "type": "module",
     "main": "dist/index.js",
     "types": "dist/types/index.d.ts",
     "exports": {
@@ -20,10 +20,10 @@
         "types": "./dist/types/index.d.ts"
     },
     "bin": {
-        "oox": "bin/cli.js"
+        "oox": "dist/bin/cli.js"
     },
     "scripts": {
-        "build": "node scripts/build.js"
+        "build": "node scripts/compile & node scripts/linking"
     },
     "author": "lipingruan",
     "homepage": "https://github.com/lipingruan/oox",

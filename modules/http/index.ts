@@ -136,8 +136,6 @@ export default class HTTPModule extends Module {
      */
     async call ( request: http.IncomingMessage, response: http.ServerResponse ) {
 
-        console.time ( 'http_lifecycle' )
-    
         if ( request.url !== this.config.path ) {
 
             const error = {
@@ -226,8 +224,6 @@ export default class HTTPModule extends Module {
         response.setHeader ( 'Content-Length', Buffer.byteLength ( formatString ) )
     
         response.end ( formatString )
-
-        console.timeEnd ( 'http_lifecycle' )
     }
     
     

@@ -83,5 +83,7 @@ typings/
 test
 
 build
-
 dist
+
+# IDE
+.idea

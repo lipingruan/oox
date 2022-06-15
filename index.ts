@@ -38,11 +38,24 @@ export class Context extends app.Context {
     caller = 'anonymous'
     // 请求者ID (长连接专用)
     callerId = ''
+    // 请求者连接把柄
+    connection?: RPCKeepAliveConnection
+
+    toJSON? ( ) {
+
+        const context = Object.assign ( { }, this )
+        delete context.connection
+
+        return JSON.stringify ( context )
+    }
 }
 
 
 
 export class Config {
+
+    [x: string]: any
+
     // 服务名称
     name = 'local'
     // 主机地址
@@ -183,9 +196,9 @@ export const keepAliveConnections: Map<string,Map<string,RPCKeepAliveConnection>
 
 
 
-export function getKeepAliveConnections ( name: string ): Map<string,RPCKeepAliveConnection>|null {
+export function getKeepAliveConnections ( name: string ): Map<string,RPCKeepAliveConnection> {
 
-    return keepAliveConnections.get ( name ) || null
+    return keepAliveConnections.get ( name ) || new Map<string, RPCKeepAliveConnection> ( )
 }
 
 
@@ -238,18 +251,28 @@ export function removeKeepAliveConnection ( name: string|RPCKeepAliveConnection,
 
 
 
-export async function rpc ( appName: string, action: string, params: any[], context?: Context ) {
+export async function rpc ( appName: string, action: string, params: any[], context?: Context ): Promise<any>
+export async function rpc ( connection: RPCKeepAliveConnection, action: string, params: any[], context?: Context ): Promise<any>
+export async function rpc ( arg1: string | RPCKeepAliveConnection, action: string, params: any[], context?: Context ) {
         
     if ( !context || !context.traceId ) {
     
         context = getContext ( )
     }
 
-    const connections = keepAliveConnections.get ( appName )
+    let connection: RPCKeepAliveConnection
 
-    if ( !connections || !connections.size ) throw new Error ( `Connection<${appName}> not found` )
+    if ( arg1 instanceof RPCKeepAliveConnection ) {
 
-    const connection: RPCKeepAliveConnection = connections.values ( ).next ( ).value
+        connection = arg1
+    } else if ( 'string' === typeof arg1 ) {
+        
+        const connections = keepAliveConnections.get ( arg1 )
+
+        if ( !connections || !connections.size ) throw new Error ( `Connection<${arg1}> not found` )
+
+        connection = connections.values ( ).next ( ).value
+    } else throw new Error ( `Unknown rpc arg1<${arg1}>` )
 
     return connection.adapter.rpc ( connection.nativeConnection, action, params, context )
 }

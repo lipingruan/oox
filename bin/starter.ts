@@ -42,6 +42,8 @@ function getEntryFile ( env: { [x: string]: any } ) {
 
 function loadEntry ( name: string, entryPath: string ) {
 
+    oox.config.name = name
+
     const methods = require ( entryPath )
 
     oox.setMethods ( methods )
@@ -90,13 +92,15 @@ export async function startup( ) {
 
     if ( 'http' in env ) {
 
-        if ( env.http )
-            Object.assign ( httpConfig, env.http )
-        else
-            httpConfig.disabled = true
+        if ( env.http ) Object.assign ( httpConfig, env.http )
+        else httpConfig.disabled = true
     }
 
-    if ( 'socketio' in env ) Object.assign ( httpConfig, env.socketio )
+    if ( 'socketio' in env ) {
+
+        if ( env.socketio ) Object.assign ( socketioConfig, env.socketio )
+        else socketioConfig.disabled = true
+    }
 
 
 

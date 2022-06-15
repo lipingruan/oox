@@ -101,13 +101,16 @@ export default class SocketIOModule extends SocketIOClient implements RPCConnect
 
         const { id, name, host } = socket.data
 
-        addKeepAliveConnection ( new RPCKeepAliveConnection ( this, id, socket.data ) )
+        const connection = new RPCKeepAliveConnection ( this, id, socket.data )
+
+        addKeepAliveConnection ( connection )
 
         const connectionContext: oox.Context = {
             sourceIP: '',
             ip: host,
             caller: name,
             callerId: id,
+            connection
         }
 
         socket.on ( 'fetchActions', async ( search: any, fn: (arg0: any) => void ) => {
