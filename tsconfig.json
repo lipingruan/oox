@@ -1,0 +1,21 @@
+{
+    "files": [
+        "index.ts",
+        "bin/cli.ts"
+    ],
+    "include": [
+    ],
+    "buildOptions": {
+        "force": true
+    },
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "CommonJS",
+        "strict": false,
+        "experimentalDecorators": true,
+        "outDir": "dist",
+        "declaration": true,
+        "declarationDir": "dist/types",
+        "resolveJsonModule": true
+    }
+}

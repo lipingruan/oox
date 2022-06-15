@@ -1,11 +1,11 @@
 
 
 
-exports.getAllEnvArgs = function ( ) {
+export function getAllEnvArgs ( ) {
 
     const args = process.argv.slice ( 2 )
 
-    const env = { }
+    const env: { [x: string]: any } = { }
 
     for ( const arg of args ) {
 
@@ -26,7 +26,7 @@ exports.getAllEnvArgs = function ( ) {
 
         const val = arg.slice ( index + 1 )
 
-        env [ key ] = exports.parseEnvArg ( val )
+        env [ key ] = parseEnvArg ( val )
         }
     }
 
@@ -35,13 +35,13 @@ exports.getAllEnvArgs = function ( ) {
 
 
 
-exports.getEnvArgs = function ( names ) {
+export function getEnvArgs ( names: string[] ) {
 
-    const env = { }
+    const env: { [x: string]: any } = { }
 
     for ( let name of names ) {
 
-        env [ name ] = exports.getEnvArg ( name )
+        env [ name ] = getEnvArg ( name )
     }
 
     return env
@@ -50,7 +50,7 @@ exports.getEnvArgs = function ( names ) {
 
 
 // 从命令行参数列表中获取参数值
-exports.getEnvArg = function ( name ) {
+export function getEnvArg ( name: string ) {
 
     if ( 
         process.argv.includes ( name ) || 
@@ -69,17 +69,19 @@ exports.getEnvArg = function ( name ) {
 
         const arg = argv.slice ( prefix.length )
 
-        return exports.parseEnvArg ( arg )
+        return parseEnvArg ( arg )
     }
 }
 
 
 
-exports.parseEnvArg = function ( value ) {
+export function parseEnvArg ( value: string ) {
 
     switch ( value ) {
         case 'no': return false
         case 'yes': return true
+        case 'none':
+        case 'NULL':
         case 'nil': return null
         default:
         try {

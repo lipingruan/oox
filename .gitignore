@@ -81,3 +81,9 @@ typings/
 
 # test direction
 test
+
+build
+dist
+
+# IDE
+.idea
