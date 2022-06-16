@@ -1,4 +1,6 @@
 
+import { randomUUID } from 'node:crypto'
+
 import * as app from './app'
 
 import { getIPAddress } from './utils'
@@ -74,15 +76,7 @@ export function getConfig ( ) {
 
 
 
-let genTraceIdFunction = ( ) => {
-
-    const uid = [ 
-        Math.floor ( Date.now ( ) / 1000 ).toString ( 16 ),
-        Math.floor ( Math.random ( ) * 0xffffffff ).toString ( 16 ).padStart ( 8, '0' )
-    ]
-
-    return uid.join ( '' )
-}
+let genTraceIdFunction = ( ) => randomUUID ( )
 
 
 
