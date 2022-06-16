@@ -34,20 +34,20 @@ import { Module } from 'node:module'
 
 
 
-function dotCall ( name: string, paths: string[] = [ ] ) {
+function dotCall ( name: string, action: string ) {
 	
 	return new Proxy ( function ( ) { }, {
 
         get ( target, key: string ) {
 
-			return dotCall ( name, paths.concat ( key ) )
+			return dotCall ( name, action ? action + '.' + key : key )
 		},
 		
 		has ( target, key ) { return true },
 		
 		apply ( target, thisArg, args ) {
 
-            return oox.rpc ( name, paths.join ( '.' ), args )
+            return oox.rpc ( name, action, args )
 		}
 	} )
 }
@@ -84,6 +84,6 @@ export function proxyGroup ( groupDirectory: string, excludes = [ ] ) {
             name = filename.split ( '.js' ) [ 0 ]
         } else continue
 
-        if ( !excludes.includes ( name ) ) rewriteModuleCache ( id, dotCall ( name ) )
+        if ( !excludes.includes ( name ) ) rewriteModuleCache ( id, dotCall ( name, '' ) )
     }
 }
