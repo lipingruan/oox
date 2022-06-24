@@ -23,7 +23,7 @@
         "oox": "dist/bin/cli.js"
     },
     "scripts": {
-        "build": "node scripts/compile & node scripts/linking"
+        "build": "node scripts/compile && node scripts/linking"
     },
     "author": "lipingruan",
     "homepage": "https://github.com/lipingruan/oox",
