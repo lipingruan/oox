@@ -2,7 +2,10 @@
 import { red, underline, green } from 'chalk'
 
 import * as oox from '../index'
-import { Socket } from '../modules/socketio/socket'
+
+import { default as SocketIOModule, Socket } from '@oox/module-socketio'
+
+const socketio = <SocketIOModule>oox.modules.get ( 'socketio' )
 
 
 
@@ -34,13 +37,13 @@ async function connect ( url: string, prevError: Error = null ) {
 
     const { host } = oox.config
 
-    const { port, path } = oox.modules.builtins.socketio.config
+    const { port, path } = socketio.config
 
     if ( `ws://${host}:${port}${path}` === url ) return
 
     try {
 
-        const socket = await oox.modules.builtins.socketio.connect ( url )
+        const socket = await socketio.connect ( url )
 
         onConnection ( socket, url )
     } catch ( error ) {

@@ -1,11 +1,7 @@
 
-import * as path from 'node:path'
-
 import Module from './module'
 
 import HTTP from './http'
-
-import SocketIO from './socketio'
 
 
 
@@ -39,7 +35,6 @@ export default class Modules extends Module {
      */
     builtins = {
         http: new HTTP,
-        socketio: new SocketIO
     }
 
 
@@ -48,7 +43,6 @@ export default class Modules extends Module {
         super ( )
 
         this.add ( this.builtins.http )
-            .add ( this.builtins.socketio )
     }
 
 
@@ -97,29 +91,6 @@ export default class Modules extends Module {
         try {
 
             for ( const module of this.#queue ) {
-
-                if ( module.name === 'oox:socketio' ) {
-                    // http & socketio shared port
-
-                    const _socketio = <SocketIO>module, _http = this.builtins.http
-
-                    const httpConfig = this.builtins.http.getConfig ( ), socketioConfig = _socketio.getConfig ( )
-
-                    let isShareServer = false
-
-                        // 都没设置端口
-                        isShareServer = !httpConfig.port && !socketioConfig.port
-                        // 都设置相同端口
-                        isShareServer = isShareServer || httpConfig.port === socketioConfig.port
-                        // http 模块未被禁用
-                        isShareServer = isShareServer && !httpConfig.disabled
-
-                    if ( isShareServer ) {
-
-                        socketioConfig.path = path.posix.join ( httpConfig.path, socketioConfig.path )
-                        _socketio.server = _http.server
-                    }
-                }
 
                 if ( !module.getConfig ( ).disabled ) {
 

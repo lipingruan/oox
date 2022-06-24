@@ -5,6 +5,7 @@
     "description": "Graceful NodeJS distributed application solution",
     "keywords": [
         "http",
+        "websocket",
         "socket.io",
         "rpc",
         "microservice",
@@ -30,10 +31,10 @@
     "license": "MIT",
     "dependencies": {
         "chalk": "^4.1.0",
-        "socket.io": "^4.4.0",
-        "socket.io-client": "^4.4.0"
+        "@oox/module-socketio": "^0.0.1"
     },
     "devDependencies": {
+        "@types/node": "^18.0.0",
         "typescript": "^4.7.3"
     },
     "engines": {

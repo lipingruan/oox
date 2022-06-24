@@ -13,6 +13,13 @@ import { configure } from './configurer'
 
 import { registry } from './register'
 
+import SocketIOModule from '@oox/module-socketio'
+
+// preload modules
+const socketio = new SocketIOModule ( )
+
+oox.modules.add ( socketio )
+
 
 
 function getEntryFile ( env: { [x: string]: any } ) {
@@ -81,7 +88,7 @@ export async function startup( ) {
     // 服务配置
     if ( !env.port && !env.http && !env.socketio ) env.port = 0
 
-    const httpConfig = oox.modules.builtins.http.config, socketioConfig = oox.modules.builtins.socketio.config
+    const httpConfig = oox.modules.builtins.http.config, socketioConfig = socketio.config
 
     if ( 'number' === typeof env.port ) {
 
