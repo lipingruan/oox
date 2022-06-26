@@ -2,12 +2,14 @@
 
 
 export class ModuleConfig {
+    [x: string]: any
     disabled = false
 }
 
 
 
 export default class Module {
+    [x: string]: any
 
     config: ModuleConfig
 
