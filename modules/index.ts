@@ -83,6 +83,27 @@ export default class Modules extends Module {
 
         this.#map.delete ( name )
     }
+
+
+
+    setConfig ( config: any ) {
+        
+        for ( const module of this.#queue ) {
+
+            if ( module.name in config ) {
+
+                const moduleConfig = config [ module.name ]
+
+                if ( moduleConfig ) {
+
+                    module.setConfig ( moduleConfig )
+                } else {
+
+                    module.setConfig ( { disabled: true } )
+                }
+            }
+        }
+    }
     
 
 

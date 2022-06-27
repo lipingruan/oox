@@ -5,6 +5,9 @@
     ],
     "include": [
     ],
+    "exclude": [
+        "dist"
+    ],
     "buildOptions": {
         "force": true
     },

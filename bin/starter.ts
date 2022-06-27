@@ -13,12 +13,17 @@ import { configure } from './configurer'
 
 import { registry } from './register'
 
+import WSModule from '@oox/module-ws'
+
 import SocketIOModule from '@oox/module-socketio'
 
 // preload modules
+const ws = new WSModule ( )
 const socketio = new SocketIOModule ( )
 
-oox.modules.add ( socketio )
+oox.modules 
+.add ( ws )
+.add ( socketio )
 
 
 
@@ -85,29 +90,9 @@ export async function startup( ) {
 
 
 
-    // 服务配置
-    if ( !env.port && !env.http && !env.socketio ) env.port = 0
-
-    const httpConfig = oox.modules.builtins.http.config, socketioConfig = socketio.config
-
-    if ( 'number' === typeof env.port ) {
-
-        httpConfig.port = socketioConfig.port = env.port
-    }
-
-    if ( env.origin ) httpConfig.origin = env.origin
-
-    if ( 'http' in env ) {
-
-        if ( env.http ) Object.assign ( httpConfig, env.http )
-        else httpConfig.disabled = true
-    }
-
-    if ( 'socketio' in env ) {
-
-        if ( env.socketio ) Object.assign ( socketioConfig, env.socketio )
-        else socketioConfig.disabled = true
-    }
+    // 服务模块配置
+    oox.modules.setConfig ( env )
+    Object.assign ( oox.config, env )
 
 
 
@@ -116,8 +101,6 @@ export async function startup( ) {
 
     console.log ( )
     console.log ( 'Service', bold`${oox.config.name}`, 'running.' )
-    if ( !httpConfig.disabled ) console.log ( '  at', underline.green`http://${oox.config.host}:${httpConfig.port}${httpConfig.path}` )
-    if ( !socketioConfig.disabled ) console.log ( '  at', underline.green`ws://${oox.config.host}:${socketioConfig.port}${socketioConfig.path}` )
     console.log ( )
 
     // 服务注册

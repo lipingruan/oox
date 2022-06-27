@@ -24,7 +24,7 @@ export default class HTTPModule extends Module {
 
 
 
-    name = 'oox:http'
+    name = 'http'
 
     config = new HTTPConfig
 
