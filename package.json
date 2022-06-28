@@ -1,7 +1,7 @@
 {
     "name": "oox",
     "private": true,
-    "version": "0.3.0-beta3",
+    "version": "0.3.0-beta4",
     "description": "Graceful NodeJS distributed application solution",
     "keywords": [
         "http",
@@ -30,7 +30,7 @@
     "homepage": "https://github.com/lipingruan/oox",
     "license": "MIT",
     "dependencies": {
-        "@oox/module-socketio": "^0.0.2",
+        "@oox/module-socketio": "^0.0.3",
         "chalk": "^4.1.0"
     },
     "devDependencies": {
