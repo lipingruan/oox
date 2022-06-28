@@ -5,8 +5,6 @@ import * as oox from '../index'
 
 import { default as SocketIOModule, Socket } from '@oox/module-socketio'
 
-const socketio = <SocketIOModule>oox.modules.get ( 'socketio' )
-
 
 
 const delay = ( ms: number ) => new Promise ( resolve => setTimeout ( resolve, ms ) )
@@ -34,6 +32,8 @@ function urlFormatter ( url: string ) {
 
 
 async function connect ( url: string, prevError: Error = null ) {
+
+    const socketio = <SocketIOModule>oox.modules.get ( 'socketio' )
 
     const { host } = oox.config
 
