@@ -62,17 +62,15 @@ export class Config {
     name = 'local'
     // 主机地址
     host = getIPAddress ( 4 ) [ 0 ]
+    // 默认监听端口
+    port = 0
+    // 默认跨域设置
+    origin = ''
 }
 
 
 
 export const config = new Config ( )
-
-
-
-export function getConfig ( ) {
-
-}
 
 
 

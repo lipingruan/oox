@@ -35,6 +35,16 @@ export default class HTTPModule extends Module {
     setConfig ( config:HTTPConfig ) {
 
         Object.assign ( this.config, config )
+
+        if ( !Object.hasOwn ( config, 'port' ) ) {
+
+            this.config.port = oox.config.port
+        }
+
+        if ( !Object.hasOwn ( config, 'origin' ) ) {
+
+            this.config.origin = oox.config.origin
+        }
     }
     
     

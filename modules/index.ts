@@ -101,6 +101,8 @@ export default class Modules extends Module {
 
                     module.setConfig ( { disabled: true } )
                 }
+
+                config [ module.name ] = module.getConfig ( )
             }
         }
     }

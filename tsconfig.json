@@ -6,7 +6,9 @@
     "include": [
     ],
     "exclude": [
-        "dist"
+        "dist",
+        "scripts",
+        "node_modules"
     ],
     "buildOptions": {
         "force": true

@@ -85,29 +85,10 @@ export async function startup( ) {
 
 
 
-    // 服务配置
-    if ( !env.port && !env.http && !env.socketio ) env.port = 0
+    // 模块配置
+    oox.modules.setConfig ( oox.config )
 
     const httpConfig = oox.modules.builtins.http.config, socketioConfig = socketio.config
-
-    if ( 'number' === typeof env.port ) {
-
-        httpConfig.port = socketioConfig.port = env.port
-    }
-
-    if ( env.origin ) httpConfig.origin = env.origin
-
-    if ( 'http' in env ) {
-
-        if ( env.http ) Object.assign ( httpConfig, env.http )
-        else httpConfig.disabled = true
-    }
-
-    if ( 'socketio' in env ) {
-
-        if ( env.socketio ) Object.assign ( socketioConfig, env.socketio )
-        else socketioConfig.disabled = true
-    }
 
 
 
