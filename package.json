@@ -8,6 +8,7 @@
         "websocket",
         "socket.io",
         "rpc",
+        "framework",
         "microservice",
         "distributed",
         "tracing"
@@ -16,9 +17,11 @@
     "main": "dist/index.js",
     "types": "dist/types/index.d.ts",
     "exports": {
-        "require": "./dist/index.js",
-        "import": "./dist/index.mjs",
-        "types": "./dist/types/index.d.ts"
+        ".": {
+            "import": "./dist/index.mjs",
+            "require": "./dist/index.js"
+        },
+        "./loader": "./dist/bin/loader.mjs"
     },
     "bin": {
         "oox": "dist/bin/cli.js"

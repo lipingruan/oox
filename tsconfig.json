@@ -16,6 +16,7 @@
     "compilerOptions": {
         "target": "ESNext",
         "module": "CommonJS",
+        "moduleResolution": "Node",
         "strict": false,
         "experimentalDecorators": true,
         "outDir": "dist",

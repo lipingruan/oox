@@ -47,18 +47,19 @@ function getEntryFile ( env: { [x: string]: any } ) {
 
 
 
-function loadEntry ( name: string, entryPath: string ) {
+async function loadEntry ( name: string, entryPath: string ) {
 
     oox.config.name = name
 
-    const methods = require ( entryPath )
+    // Typescript 4.7.3, not supported import() expression
+    const methods = await eval ( `import('file://${entryPath.replace(/\\/g, '/')}')` )
 
-    oox.setMethods ( methods )
+    oox.setMethods ( methods.default || methods )
 }
 
 
 
-export async function startup( ) {
+export async function startup ( ) {
 
     // 加载环境变量
     const env = configure ( )
@@ -69,6 +70,11 @@ export async function startup( ) {
 
     // 获取服务入口地址
     const entryFile = getEntryFile ( env )
+
+    oox.config.entryFile = {
+        path: entryFile.path.replace ( /\\/g, '/' ),
+        group: entryFile.group.replace ( /\\/g, '/' ),
+    }
 
     // 代理<服务间调用>
     if ( env.group ) {
@@ -81,7 +87,7 @@ export async function startup( ) {
     }
 
     // 加载服务
-    loadEntry ( entryFile.name, entryFile.path )
+    await loadEntry ( entryFile.name, entryFile.path )
 
 
 

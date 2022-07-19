@@ -60,6 +60,13 @@ export class Config {
 
     // 服务名称
     name = 'local'
+    // 启动文件
+    entryFile = {
+        // 启动文件路径
+        path: '',
+        // 服务列表路径
+        group: '',
+    }
     // 主机地址
     host = getIPAddress ( 4 ) [ 0 ]
     // 默认监听端口

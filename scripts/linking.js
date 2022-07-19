@@ -25,6 +25,7 @@ const copyFiles = [
     'README.md',
     'LICENSE',
     'index.mjs',
+    'bin/loader.mjs',
 ]
 
 for ( const copyFile of copyFiles ) {
