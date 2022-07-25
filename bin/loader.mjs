@@ -124,7 +124,7 @@ function getImportAttributes ( importerSpecifier, specifier ) {
         attributes.push ( ...definedAttributes )
     }
 
-    return attributes
+    return Array.from ( new Set ( attributes ) )
 }
 
 
