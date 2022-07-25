@@ -3,6 +3,8 @@ import path from 'node:path'
 
 import os from 'node:os'
 
+import fs from 'node:fs'
+
 import { get as httpGet } from 'node:http'
 
 import { get as httpsGet } from 'node:https'
@@ -11,14 +13,21 @@ import oox from '../index.mjs'
 
 
 
-function generateRPCProxyScript ( name ) {
+function generateRPCProxyScript ( name, attributes = [ ] ) {
 
+    let attrExports = ''
+
+    for ( const attr of attributes ) {
+    
+        attrExports += `\nexport const ${attr} = proxyer.${attr}\n`
+    }
+    
     const script = `
 import oox from 'oox'
-function RPC ( ) { }
+function RPC_${name} ( ) { }
 function dotCall ( name, action ) {
 	
-	return new Proxy ( RPC, {
+	return new Proxy ( RPC_${name}, {
 
         get ( target, key ) {
 
@@ -35,6 +44,7 @@ function dotCall ( name, action ) {
 }
 const proxyer = dotCall ( '${name}', '' )
 export default proxyer
+${attrExports}
 `
 
     return script
@@ -42,9 +52,23 @@ export default proxyer
 
 
 
-function generateRPCProxyURL ( name ) {
+function generateRPCProxyURL ( name, attributes ) {
+    
+    let searchText = ''
 
-    return `oox://rpc/${name}.mjs`
+    if ( attributes.length ) {
+
+        const search = new URLSearchParams ( )
+
+        for ( const attr of attributes ) {
+    
+            search.append ( 'attr', attr )
+        }
+
+        searchText = '?' + search.toString ( )
+    }
+
+    return `oox://rpc/${name}.mjs${searchText}`
 }
 
 
@@ -64,6 +88,48 @@ function isOOXURL ( url ) {
 
 
 /**
+ * make ESModule support dynamic <export *> attributes import
+ * @param {string} importerSpecifier the import url
+ * @param {string} specifier parentURL
+ * @returns {string[]}
+ */
+function getImportAttributes ( importerSpecifier, specifier ) {
+
+    const attributes = [ ]
+
+    const contents = fs.readFileSync ( importerSpecifier, 'utf-8' )
+
+    // import * as xxx from "xxx"
+    const mergeImport = contents.match ( new RegExp ( `import.+\\*\\s*as\\s+(\\w+)\\s+from\\s*["']${specifier}["']` ) )
+
+    if ( mergeImport ) {
+
+        const mergeName = mergeImport [ 1 ]
+
+        const attributesIterator = contents.matchAll ( new RegExp ( `${mergeName}\\s*\\.\\s*(\\w+)`, 'g' ) )
+
+        for ( const caseItem of attributesIterator ) {
+
+            attributes.push ( caseItem [ 1 ] )
+        }
+    }
+
+    // import { a, b, c } from 'xxx'
+    const attributeImport = contents.match ( new RegExp ( `import.+{(.+)}\\s*from\\s*["']${specifier}["']` ) )
+
+    if ( attributeImport ) {
+
+        const definedAttributes = attributeImport [ 1 ].split ( ',' ).map ( v => v.trim ( ) ).filter ( v => !v.startsWith ( 'default' ) )
+        
+        attributes.push ( ...definedAttributes )
+    }
+
+    return attributes
+}
+
+
+
+/**
  * @param {string} specifier
  * @param {{
  *   conditions: string[],
@@ -73,6 +139,8 @@ function isOOXURL ( url ) {
  * @returns {Promise<{ url: string }>}
  */
 export async function resolve ( specifier, context, defaultResolve ) {
+
+    const defaultSpecifer = specifier
 
     const { parentURL } = context
 
@@ -114,7 +182,14 @@ export async function resolve ( specifier, context, defaultResolve ) {
 
         const matchResult = subSpecifier.match ( /^\/?([\w-]+)(\/index)?(\.m?js)?$/ )
 
-        if ( matchResult ) return { url: generateRPCProxyURL ( matchResult [ 1 ] ) }
+        if ( matchResult ) {
+
+            const importerSpecifier = parentURL.replace ( os.platform ( ) === 'win32' ? /file:\/+/ : 'file://', '' )
+            
+            const attributes = getImportAttributes ( importerSpecifier, defaultSpecifer )
+
+            return { url: generateRPCProxyURL ( matchResult [ 1 ], attributes ) }
+        }
     }
 
     // restore Windows specifier protocol
@@ -186,8 +261,11 @@ export function getSource ( url, context, defaultGetSource ) {
             const regexp = /\/([\w-]+)\.mjs$/
 
             const matchResult = mURL.pathname.match ( regexp )
+
+            // read all import attributes
+            const attributes = mURL.searchParams.getAll ( 'attr' )
         
-            const source = generateRPCProxyScript ( matchResult [ 1 ] )
+            const source = generateRPCProxyScript ( matchResult [ 1 ], attributes )
 
             return { format: 'module', source }
         }
