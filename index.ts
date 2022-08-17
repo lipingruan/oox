@@ -43,12 +43,12 @@ export class Context extends app.Context {
     // 请求者连接把柄
     connection?: RPCKeepAliveConnection
 
-    toJSON? ( ) {
+    toJSON ( ) {
 
         const context = Object.assign ( { }, this )
         delete context.connection
 
-        return JSON.stringify ( context )
+        return context
     }
 }
 
