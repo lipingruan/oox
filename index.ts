@@ -250,6 +250,33 @@ export function removeKeepAliveConnection ( name: string|RPCKeepAliveConnection,
 
 
 
+/**
+ * random connection select for default load balance policy
+ * @param name service name
+ * @returns selected connection
+ */
+let loadBalancePolicy = ( name: string ) => {
+
+    const connections = keepAliveConnections.get ( name )
+
+    if ( !connections || !connections.size ) return null
+
+    const arrayConnections = Array.from ( connections.values ( ) )
+
+    const index = Math.floor ( Math.random ( ) * arrayConnections.length )
+
+    return arrayConnections [ index ]
+}
+
+
+
+export function setLoadBalancePolicy ( policy: ( name: string ) => RPCKeepAliveConnection ) {
+
+    loadBalancePolicy = policy
+}
+
+
+
 export async function rpc ( appName: string, action: string, params: any[], context?: Context ): Promise<any>
 export async function rpc ( connection: RPCKeepAliveConnection, action: string, params: any[], context?: Context ): Promise<any>
 export async function rpc ( arg1: string | RPCKeepAliveConnection, action: string, params: any[], context?: Context ) {
@@ -265,12 +292,10 @@ export async function rpc ( arg1: string | RPCKeepAliveConnection, action: strin
 
         connection = arg1
     } else if ( 'string' === typeof arg1 ) {
-        
-        const connections = keepAliveConnections.get ( arg1 )
 
-        if ( !connections || !connections.size ) throw new Error ( `Connection<${arg1}> not found` )
+        connection = loadBalancePolicy ( arg1 )
 
-        connection = connections.values ( ).next ( ).value
+        if ( !connection ) throw new Error ( `Connection<${arg1}> not found` )
     } else throw new Error ( `Unknown rpc arg1<${arg1}>` )
 
     return connection.adapter.rpc ( connection.nativeConnection, action, params, context )
