@@ -9,7 +9,6 @@ import Module, { ModuleConfig } from './modules/module'
 
 import Modules from './modules'
 
-// import { wrappedActions, actionMiddlewares, middlewares } from './middleware'
 
 
 export { ReturnsBody } from './app'

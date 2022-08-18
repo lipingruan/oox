@@ -5,8 +5,6 @@ import { AsyncLocalStorage } from 'node:async_hooks'
 
 import { genKVMethods } from './utils'
 
-// import { wrappedActions, actionMiddlewares, middlewares } from './middleware'
-
 
 
 export * as logger from './logger'
@@ -221,19 +219,6 @@ export async function execute ( action: string, params: Array<any>, context: Con
     // make sure target action execute after all proxies
     if ( target ) {
 
-        /*
-        const sourceMethod = wrappedActions.get ( action )
-
-        const middlewareNames = actionMiddlewares.get ( sourceMethod )
-
-        if ( middlewareNames && middlewareNames.length ) for ( const name of middlewareNames ) {
-
-            const middleware = middlewares.get ( name )
-
-            await middleware ( action, params, context )
-        }
-        */
-        
         return await target ( ...params )
     }
 }
