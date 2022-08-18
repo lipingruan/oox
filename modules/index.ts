@@ -3,6 +3,8 @@ import Module from './module'
 
 import HTTP from './http'
 
+import SocketIO from './socketio'
+
 
 
 export default class Modules extends Module {
@@ -35,6 +37,7 @@ export default class Modules extends Module {
      */
     builtins = {
         http: new HTTP,
+        socketio: new SocketIO,
     }
 
 
@@ -43,6 +46,7 @@ export default class Modules extends Module {
         super ( )
 
         this.add ( this.builtins.http )
+        this.add ( this.builtins.socketio )
     }
 
 

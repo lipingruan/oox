@@ -33,12 +33,13 @@
     "homepage": "https://github.com/lipingruan/oox",
     "license": "MIT",
     "dependencies": {
-        "@oox/module-socketio": "^0.0.3",
-        "chalk": "^4.1.0"
+        "chalk": "^4.1.0",
+        "socket.io": "^4.4.0",
+        "socket.io-client": "^4.4.0"
     },
     "devDependencies": {
         "@types/node": "^18.0.0",
-        "typescript": "^4.7.3"
+        "typescript": "^4.7.4"
     },
     "engines": {
         "node": ">=12.0.0"

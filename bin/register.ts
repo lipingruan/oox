@@ -3,7 +3,7 @@ import { red, underline, green } from 'chalk'
 
 import * as oox from '../index'
 
-import { default as SocketIOModule, Socket } from '@oox/module-socketio'
+import { default as SocketIOModule, Socket } from '../modules/socketio'
 
 
 

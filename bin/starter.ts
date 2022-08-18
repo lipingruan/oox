@@ -13,13 +13,6 @@ import { configure } from './configurer'
 
 import { registry } from './register'
 
-import SocketIOModule from '@oox/module-socketio'
-
-// preload modules
-const socketio = new SocketIOModule ( )
-
-oox.modules.add ( socketio )
-
 
 
 function getEntryFile ( env: { [x: string]: any } ) {
@@ -94,7 +87,7 @@ export async function startup ( ) {
     // 模块配置
     oox.modules.setConfig ( oox.config )
 
-    const httpConfig = oox.modules.builtins.http.config, socketioConfig = socketio.config
+    const { http: { config: httpConfig }, socketio: { config: socketioConfig } } = oox.modules.builtins
 
 
 
