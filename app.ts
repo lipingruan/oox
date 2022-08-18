@@ -78,8 +78,8 @@ export function getMethods ( ) {
 export function on ( event: 'request', listener: ( action: string, params: any[], context: Context ) => void ): void
 export function on ( event: 'success', listener: ( action: string, params: any[], context: Context, result: ReturnsBody ) => void ): void
 export function on ( event: 'fail',    listener: ( action: string, params: any[], context: Context, error: Error ) => void ): void
-export function on ( event: 'log',     listener: ( context: Context, ...msgs: any[] ) => void ): void
-export function on ( event: string, listener: ( ...args: any[] ) => void ) {
+export function on ( event: 'log',     listener: ( context: Context, tag: string, msgs: any[] ) => void ): void
+export function on ( event: string,    listener: ( ...args: any[] ) => void ) {
     return eventHub.on ( event, listener )
 }
 

@@ -26,6 +26,7 @@ export const {
     sourceKVMethods,
     call,
     execute,
+    logger,
     on
 } = app
 
