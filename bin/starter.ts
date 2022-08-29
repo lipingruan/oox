@@ -55,7 +55,7 @@ async function loadEntry ( name: string, entryPath: string ) {
 export async function startup ( ) {
 
     // 加载环境变量
-    const env = configure ( )
+    const env = await configure ( )
 
     Object.assign ( oox.config, env )
 

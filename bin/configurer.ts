@@ -40,27 +40,46 @@ function mergeFlatEnv ( env: { [x: string]: any } ) {
 
 
 
-export function configure ( ) {
+async function readEnvFile ( filePath: string ) {
 
-    let env = Object.create ( null )
+    let env: { [x: string]: any } = { }
+
+    if ( filePath && fs.existsSync ( filePath ) ) {
+
+        if ( filePath.endsWith ( '.json' ) ) {
+
+            const raw = fs.readFileSync ( filePath, 'utf-8' )
+
+            env = JSON.parse ( raw )
+        } else {
+
+            const finalPath = path.resolve ( filePath ).replace ( /\\/g, '/' )
+
+            env = await eval ( `import('file://${finalPath}')` )
+        }
+    } else {
+
+        throw new Error ( 'Env file not found: ' + filePath )
+    }
+
+    return env.default || env
+}
+
+
+
+export async function configure ( ) {
+
+    const env = Object.create ( null )
 
     const defaultEnvPath = argv.getEnvArg ( 'default-env' )
 
-    if ( defaultEnvPath && fs.existsSync ( defaultEnvPath ) ) {
+    const targetEnvPath = argv.getEnvArg ( 'env' )
 
-        Object.assign ( env, require ( path.resolve ( defaultEnvPath ) ) )
-    }
+    const defaultEnv = defaultEnvPath ? await readEnvFile ( defaultEnvPath ) : { }
 
+    const targetEnv = targetEnvPath ? await readEnvFile ( targetEnvPath ) : { }
 
-
-    const envPath = argv.getEnvArg ( 'env' )
-
-    if ( envPath && fs.existsSync ( envPath ) ) {
-
-        Object.assign ( env, require ( path.resolve ( envPath ) ) )
-    }
-
-    Object.assign ( env, argv.getAllEnvArgs ( ) )
+    Object.assign ( env, defaultEnv, targetEnv, argv.getAllEnvArgs ( ) )
 
     mergeFlatEnv ( env )
 
