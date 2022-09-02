@@ -26,7 +26,8 @@ export const {
     call,
     execute,
     logger,
-    on
+    on,
+    emit,
 } = app
 
 

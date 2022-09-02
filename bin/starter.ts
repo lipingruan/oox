@@ -87,12 +87,16 @@ export async function startup ( ) {
     // 模块配置
     oox.modules.setConfig ( oox.config )
 
+    oox.emit ( 'app:configured' )
+
     const { http: { config: httpConfig }, socketio: { config: socketioConfig } } = oox.modules.builtins
 
 
 
     // 服务启动
     await oox.serve ( )
+
+    oox.emit ( 'app:served' )
 
     console.log ( )
     console.log ( 'Service', bold`${oox.config.name}`, 'running.' )
