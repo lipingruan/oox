@@ -1,6 +1,8 @@
 
 import * as http from 'node:http'
 
+import { parse as parseQueryString } from 'node:querystring'
+
 import { httpRequest, parseHTTPBody } from './utils'
 
 import * as oox from '../../index'
@@ -167,7 +169,13 @@ export default class HTTPModule extends Module {
     
         try {
     
-            body = await parseHTTPBody ( request )
+            if ( 'GET' === request.method ) {
+
+                body = parseQueryString ( request.url.split ( '?' ).pop ( ) )
+            } else {
+
+                body = await parseHTTPBody ( request )
+            }
     
             if ( !body || 'object' !== typeof body ) throw new Error ( 'Content Invalid' )
     
@@ -194,7 +202,7 @@ export default class HTTPModule extends Module {
         // startup client ip
         const sourceIP = String ( request.headers [ 'x-real-ip' ] || '' )
     
-        const { action, params = [ ] } = body
+        const { action = 'index', params = [ ] } = body
     
         const context = oox.genContext ( { traceId, caller, sourceIP, ip, callerId: '' } )
     

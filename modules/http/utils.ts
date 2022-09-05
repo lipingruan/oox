@@ -1,13 +1,13 @@
 
 import * as http from 'node:http'
-import * as stream from 'node:stream'
+import { Readable } from 'node:stream'
 
 
 
 /**
  * Stream => Buffer
  */
-export function stream2buffer ( stream: stream.Readable, totalLength: number=0 ): Promise<Buffer> {
+export function stream2buffer ( stream: Readable, totalLength: number=0 ): Promise<Buffer> {
 
   return new Promise ( function ( resolve, reject ) {
 
