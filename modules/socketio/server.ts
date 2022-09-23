@@ -105,7 +105,7 @@ export default class SocketIOServer extends Module {
 
         if ( this.#isSelfServer ) 
         await new Promise<void> ( ( resolve, reject ) =>
-            this.server.close ( error => error ? reject ( error ) : resolve ( ) ) )
+            this.server.listening && this.server.close ( error => error ? reject ( error ) : resolve ( ) ) )
     }
 
 
