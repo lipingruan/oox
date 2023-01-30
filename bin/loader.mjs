@@ -147,16 +147,17 @@ export async function resolve ( specifier, context, defaultResolve ) {
     // HTTP & HTTPS
     if ( isWebURL ( specifier ) ) {
 
-        return { url: specifier }
+        return { shortCircuit: true, url: specifier }
     } else if ( isWebURL ( parentURL ) && ( specifier.startsWith ( '.' ) || specifier.startsWith ( '/' ) ) ) {
 
-        return { url: new URL ( specifier, parentURL ).href }
+        return { shortCircuit: true, url: new URL ( specifier, parentURL ).href }
     }
 
     // OOX special alias for web package
     if ( specifier === 'oox' ) {
 
         return {
+            shortCircuit: true,
             url: 'file://' + path.resolve ( './node_modules/oox/index.mjs' )
         }
     }
@@ -188,7 +189,7 @@ export async function resolve ( specifier, context, defaultResolve ) {
             
             const attributes = getImportAttributes ( importerSpecifier, defaultSpecifer )
 
-            return { url: generateRPCProxyURL ( matchResult [ 1 ], attributes ) }
+            return { shortCircuit: true, url: generateRPCProxyURL ( matchResult [ 1 ], attributes ) }
         }
     }
 
@@ -250,7 +251,7 @@ export function getSource ( url, context, defaultGetSource ) {
             let source = ''
             res
             .on ( 'data', chunk => source += chunk )
-            .on ( 'end', () => resolve ( { format: 'module', source } ) )
+            .on ( 'end', () => resolve ( { shortCircuit: true, format: 'module', source } ) )
         } ).on ( 'error', reject ) )
     } else if ( isOOXURL ( url ) ) {
 
@@ -267,7 +268,7 @@ export function getSource ( url, context, defaultGetSource ) {
         
             const source = generateRPCProxyScript ( matchResult [ 1 ], attributes )
 
-            return { format: 'module', source }
+            return { shortCircuit: true, format: 'module', source }
         }
     }
   
