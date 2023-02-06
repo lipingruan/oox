@@ -264,15 +264,17 @@ export async function resolve ( specifier, context, defaultResolve ) {
 
                 const paths = filename.split ( '/' )
 
-                const matchName = justNeedEntry ? 'index.' : paths.pop ( ) + '.'
+                const filenameWithoutExtension = justNeedEntry ? 'index' : paths.pop ( )
 
-                const filenames = fs.readdirSync ( dirname )
+                const matchEntryRegExp = new RegExp ( `^${filenameWithoutExtension}\\.((\\w?js)|(ts\\w?))$` )
 
-                for ( const filename of filenames ) {
+                const entries = fs.readdirSync ( dirname )
 
-                    if ( !filename.startsWith ( matchName ) ) continue
+                for ( const entry of entries ) {
 
-                    paths.push ( filename )
+                    if ( !matchEntryRegExp.test ( entry ) ) continue
+
+                    paths.push ( entry )
 
                     specifier = 'file://' + paths.join ( '/' )
 

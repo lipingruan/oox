@@ -19,7 +19,9 @@ function getEntryFile ( env: { [x: string]: any } ) {
 
     const args = process.argv.slice ( 2 )
 
-    var [ entryFilename ] = args.filter ( arg => !arg.includes ( '=' ) && arg.endsWith ( '.js' ) )
+    const entryMatchRegExp = /(\w+)\.((\w?js)|(ts\w?))$/
+
+    var [ entryFilename ] = args.filter ( arg => !arg.includes ( '=' ) && entryMatchRegExp.test ( arg ) )
 
     if ( !entryFilename ) throw new Error ( 'Cannot find entry file' )
 
@@ -33,7 +35,11 @@ function getEntryFile ( env: { [x: string]: any } ) {
 
     const groupFullDirectory = env.group ? path.resolve ( env.group ) : ''
 
-    var name = filename === 'index.js' && groupFullDirectory !== fullDirectory ? directory : filename.split ( '.js' ) [ 0 ]
+    const entryMatch = filename.match ( entryMatchRegExp )
+
+    const entryFilenameWithoutExtension = entryMatch [ 1 ]
+
+    var name = entryFilenameWithoutExtension === 'index' && groupFullDirectory !== fullDirectory ? directory : entryFilenameWithoutExtension
 
     return { name, path: fullPath, group: groupFullDirectory }
 }
