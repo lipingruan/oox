@@ -74,15 +74,25 @@ export function proxyGroup ( groupDirectory: string, excludes = [ ] ) {
 
         let id = '', name = ''
 
-        if ( stat.isDirectory ( ) && fs.existsSync ( fullPath + '/index.js' ) ) {
+        if ( stat.isDirectory ( ) ) {
 
-            id = fullPath + '/index.js'
+            const entries = fs.readdirSync ( fullPath )
+
+            for ( const entry of entries ) {
+
+                if ( /^index\.((\w?js)|(ts\w?))$/.test ( entry ) ) id = path.resolve ( fullPath, entry )
+            }
+
             name = filename
-        } else if ( filename.endsWith ( '.js' ) ) {
+        } else {
+
+            const scriptMatch = filename.match ( /(\w+)\.((\w?js)|(ts\w?))$/ )
+
+            if ( !scriptMatch ) continue
 
             id = fullPath
-            name = filename.split ( '.js' ) [ 0 ]
-        } else continue
+            name = scriptMatch [ 1 ]
+        }
 
         if ( !excludes.includes ( name ) ) rewriteModuleCache ( id, dotCall ( name, '' ) )
     }
