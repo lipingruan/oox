@@ -12,6 +12,39 @@ import { get as httpsGet } from 'node:https'
 import oox from '../index.mjs'
 
 
+/**
+ * NodeJS versions < 16 dose not support loader chain
+ */
+const NodeJSBigVersion = +process.versions.node.split('.').shift()
+const useCompatLoader = NodeJSBigVersion < 16
+const compatLoaders = []
+if ( useCompatLoader ) {
+    const args = process.execArgv
+    let index = -1, size = args.length
+    let isLoaderTag = false
+    while ( ++index < size ) {
+
+        const symbol = args [ index ]
+
+        if ( isLoaderTag ) {
+
+            isLoaderTag = false
+
+            if ( 'oox/loader' === symbol ) break
+            
+            compatLoaders.push ( await import ( symbol ) )
+        }
+
+        if ( [ '--loader', '--experimental-loader' ].includes ( symbol ) ) {
+
+            isLoaderTag = true
+        }
+    }
+
+    compatLoaders.reverse ( )
+}
+
+
 
 function generateRPCProxyScript ( name, attributes = [ ] ) {
 
@@ -199,6 +232,75 @@ export async function resolve ( specifier, context, defaultResolve ) {
         specifier = 'file://' + specifier
     }
 
+    // TypeScript file import ignored '.ts' suffix supported
+    // TypeScript directory import supported
+    if ( specifier.startsWith ( 'file://' ) ) {
+
+        const url = new URL ( specifier )
+
+        let filename = url.pathname
+
+        if ( os.platform ( ) === 'win32' && filename.startsWith ( '/' ) ) {
+
+            filename = filename.replace ( '/', '' )
+        }
+
+        const stat0 = fs.statSync ( filename, {
+            throwIfNoEntry: false
+        } )
+
+        if ( !stat0 || stat0.isDirectory ( ) ) {
+
+            const justNeedEntry = stat0 && stat0.isDirectory ( )
+
+            const dirname = justNeedEntry ? filename : path.dirname ( filename )
+
+            const stat1 = justNeedEntry ? stat0 : fs.statSync ( dirname, {
+                throwIfNoEntry: false
+            } )
+
+            // find entry file
+            if ( stat1 && stat1.isDirectory ( ) ) {
+
+                const paths = filename.split ( '/' )
+
+                const matchName = justNeedEntry ? 'index.' : paths.pop ( ) + '.'
+
+                const filenames = fs.readdirSync ( dirname )
+
+                for ( const filename of filenames ) {
+
+                    if ( !filename.startsWith ( matchName ) ) continue
+
+                    paths.push ( filename )
+
+                    specifier = 'file://' + paths.join ( '/' )
+
+                    break
+                }
+            }
+        }
+    }
+
+    if ( useCompatLoader ) {
+
+        const iterator = compatLoaders.values ( )
+
+        const { value } = iterator.next ( )
+
+        if ( value ) {
+
+            return value.resolve ( specifier, context, ( specifier, context, nextResolve ) => {
+
+                const { value } = iterator.next ( )
+
+                if ( value ) return value.resolve ( specifier, context, nextResolve )
+
+                return defaultResolve ( specifier, context, defaultResolve )
+            } )
+        }
+    }
+
     return defaultResolve ( specifier, context, defaultResolve )
 }
 
@@ -222,6 +324,25 @@ export async function load ( url, context, defaultLoad ) {
         return getSource ( url, context, defaultLoad )
     }
 
+    if ( useCompatLoader ) {
+
+        const iterator = compatLoaders.values ( )
+
+        const { value } = iterator.next ( )
+
+        if ( value ) {
+
+            return value.load ( url, context, ( url, context, nextLoad ) => {
+
+                const { value } = iterator.next ( )
+
+                if ( value ) return value.load ( url, context, nextLoad )
+
+                return defaultLoad ( url, context, defaultLoad )
+            } )
+        }
+    }
+
     return defaultLoad ( url, context, defaultLoad )
 }
 
@@ -233,6 +354,25 @@ export function getFormat ( url, context, defaultGetFormat ) {
 
         return {
             format: 'module'
+        }
+    }
+
+    if ( useCompatLoader ) {
+
+        const iterator = compatLoaders.values ( )
+
+        const { value } = iterator.next ( )
+
+        if ( value ) {
+
+            return value.getFormat ( url, context, ( url, context, nextGetFormat ) => {
+
+                const { value } = iterator.next ( )
+
+                if ( value ) return value.getFormat ( url, context, nextGetFormat )
+
+                return defaultGetFormat ( url, context, defaultGetFormat )
+            } )
         }
     }
 
@@ -274,7 +414,3 @@ export function getSource ( url, context, defaultGetSource ) {
   
     return defaultGetSource ( url, context, defaultGetSource )
 }
-
-
-
-process.on ( 'unhandledRejection', console.error )
