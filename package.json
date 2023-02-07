@@ -21,7 +21,8 @@
             "import": "./dist/index.mjs",
             "require": "./dist/index.js"
         },
-        "./loader": "./dist/bin/loader.mjs"
+        "./loader": "./dist/bin/loader.mjs",
+        "./cli": "./dist/bin/cli.js"
     },
     "bin": {
         "oox": "dist/bin/cli.js"

@@ -15,13 +15,16 @@ import { registry } from './register'
 
 
 
-function getEntryFile ( env: { [x: string]: any } ) {
-
-    const args = process.argv.slice ( 2 )
+function getEntryFile ( env: { [x: string]: any }, entryFilename?: string ) {
 
     const entryMatchRegExp = /(\w+)\.((\w?js)|(ts\w?))$/
 
-    var [ entryFilename ] = args.filter ( arg => !arg.includes ( '=' ) && entryMatchRegExp.test ( arg ) )
+    if ( !entryFilename ) {
+
+        const args = process.argv.slice ( 2 )
+
+        entryFilename = args.find ( arg => !arg.includes ( '=' ) && entryMatchRegExp.test ( arg ) )
+    }
 
     if ( !entryFilename ) throw new Error ( 'Cannot find entry file' )
 
@@ -58,17 +61,17 @@ async function loadEntry ( name: string, entryPath: string ) {
 
 
 
-export async function startup ( ) {
+export async function startup ( env?: {[x: string]: any}, entryFilename?: string ) {
 
     // 加载环境变量
-    const env = await configure ( )
+    env = await configure ( env )
 
     Object.assign ( oox.config, env )
 
 
 
     // 获取服务入口地址
-    const entryFile = getEntryFile ( env )
+    const entryFile = getEntryFile ( env, entryFilename )
 
     oox.config.entryFile = {
         path: entryFile.path.replace ( /\\/g, '/' ),

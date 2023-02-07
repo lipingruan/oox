@@ -113,9 +113,23 @@ function isWebURL ( url ) {
 
 
 
+function isFileURL ( url ) {
+
+    return url && url.startsWith ( 'file://' )
+}
+
+
+
 function isOOXURL ( url ) {
 
     return url && url.startsWith ( 'oox://' )
+}
+
+
+
+function pathCorrect ( path ) {
+
+    return os.platform ( ) === 'win32' && path.startsWith ( '/' ) ? path.replace ( '/', '' ) : path
 }
 
 
@@ -163,6 +177,99 @@ function getImportAttributes ( importerSpecifier, specifier ) {
 
 
 /**
+ * transform local call => RPC
+ * @param {string} originalSpecifier 
+ * @param {string} specifier 
+ * @param {string} parentURL 
+ * @returns 
+ */
+function ooxRPCImportTransform ( originalSpecifier, specifier, parentURL ) {
+
+    const { entryFile } = oox.config
+
+    const groupURL = entryFile.group ? new URL ( '/' + entryFile.group, 'file://' ) : null
+
+    // OOX RPC Proxy URL generation
+    if ( !specifier.endsWith ( entryFile.path ) && groupURL && specifier.startsWith ( groupURL.href ) ) {
+
+        const subSpecifier = specifier.slice ( groupURL.href.length )
+
+        const matchResult = subSpecifier.match ( /^\/?([\w-]+)(\/index)?(\.m?js)?$/ )
+
+        if ( matchResult ) {
+
+            const importerSpecifier = parentURL.replace ( os.platform ( ) === 'win32' ? /file:\/+/ : 'file://', '' )
+
+            const attributes = getImportAttributes ( importerSpecifier, originalSpecifier )
+
+            return { shortCircuit: true, url: generateRPCProxyURL ( matchResult [ 1 ], attributes ) }
+        }
+    }
+
+    return null
+}
+
+
+
+/**
+ * Directory import supported
+ * Ignored '.ts|.js' suffix import supported
+ * @param {string} specifier 
+ * @returns {string}
+ */
+function directoryImportTransform ( specifier ) {
+
+    let filename = new URL ( specifier ).pathname
+
+    if ( os.platform ( ) === 'win32' && filename.startsWith ( '/' ) ) {
+
+        filename = filename.replace ( '/', '' )
+    }
+
+    const stat0 = fs.statSync ( filename, {
+        throwIfNoEntry: false
+    } )
+
+    if ( !stat0 || stat0.isDirectory ( ) ) {
+
+        const justNeedEntry = stat0 && stat0.isDirectory ( )
+
+        const dirname = justNeedEntry ? filename : path.dirname ( filename )
+
+        const stat1 = justNeedEntry ? stat0 : fs.statSync ( dirname, {
+            throwIfNoEntry: false
+        } )
+
+        // find entry file
+        if ( stat1 && stat1.isDirectory ( ) ) {
+
+            const paths = filename.split ( '/' )
+
+            const filenameWithoutExtension = justNeedEntry ? 'index' : paths.pop ( )
+
+            const matchEntryRegExp = new RegExp ( `^${filenameWithoutExtension}\\.((\\w?js)|(ts\\w?))$` )
+
+            const entries = fs.readdirSync ( dirname )
+
+            for ( const entry of entries ) {
+
+                if ( !matchEntryRegExp.test ( entry ) ) continue
+
+                paths.push ( entry )
+
+                specifier = 'file://' + paths.join ( '/' )
+
+                break
+            }
+        }
+    }
+
+    return specifier
+}
+
+
+
+/**
  * @param {string} specifier
  * @param {{
  *   conditions: string[],
@@ -173,7 +280,7 @@ function getImportAttributes ( importerSpecifier, specifier ) {
  */
 export async function resolve ( specifier, context, defaultResolve ) {
 
-    const defaultSpecifer = specifier
+    const originalSpecifier = specifier
 
     const { parentURL } = context
 
@@ -187,102 +294,26 @@ export async function resolve ( specifier, context, defaultResolve ) {
     }
 
     // OOX special alias for web package
-    if ( specifier === 'oox' ) {
+    if ( specifier === 'oox' && !isFileURL ( parentURL ) ) {
 
         return {
             shortCircuit: true,
-            url: 'file://' + path.resolve ( './node_modules/oox/index.mjs' )
+            url: await import.meta.resolve ( specifier )
         }
     }
 
-    const { entryFile } = oox.config
+    if ( !isFileURL ( specifier ) ) {
 
-    // Relative specifier concat to absolute path
-    if ( specifier.startsWith ( '.' ) && parentURL ) {
+        const { url } = defaultResolve ( specifier, context, defaultResolve )
 
-        specifier = path.posix.join ( path.dirname ( parentURL.replace ( 'file://', '' ) ), specifier )
+        specifier = url
     }
 
-    // Windows pathname remove root sep
-    if ( os.platform ( ) === 'win32' && specifier.startsWith ( '/' ) ) {
+    const ooxRPCTransform = ooxRPCImportTransform ( originalSpecifier, specifier, parentURL )
 
-        specifier = specifier.replace ( '/', '' )
-    }
+    if ( ooxRPCTransform ) return ooxRPCTransform
 
-    // OOX RPC Proxy URL generation
-    if ( !specifier.endsWith ( entryFile.path ) && entryFile.group && specifier.startsWith ( entryFile.group ) ) {
-
-        const subSpecifier = specifier.slice ( entryFile.group.length )
-
-        const matchResult = subSpecifier.match ( /^\/?([\w-]+)(\/index)?(\.m?js)?$/ )
-
-        if ( matchResult ) {
-
-            const importerSpecifier = parentURL.replace ( os.platform ( ) === 'win32' ? /file:\/+/ : 'file://', '' )
-            
-            const attributes = getImportAttributes ( importerSpecifier, defaultSpecifer )
-
-            return { shortCircuit: true, url: generateRPCProxyURL ( matchResult [ 1 ], attributes ) }
-        }
-    }
-
-    // restore Windows specifier protocol
-    if ( os.platform ( ) === 'win32' && specifier.includes ( '/' ) && !specifier.startsWith ( 'file://' ) ) {
-
-        specifier = 'file://' + specifier
-    }
-
-    // TypeScript file import ignored '.ts' suffix supported
-    // TypeScript directory import supported
-    if ( specifier.startsWith ( 'file://' ) ) {
-
-        const url = new URL ( specifier )
-
-        let filename = url.pathname
-
-        if ( os.platform ( ) === 'win32' && filename.startsWith ( '/' ) ) {
-
-            filename = filename.replace ( '/', '' )
-        }
-
-        const stat0 = fs.statSync ( filename, {
-            throwIfNoEntry: false
-        } )
-
-        if ( !stat0 || stat0.isDirectory ( ) ) {
-
-            const justNeedEntry = stat0 && stat0.isDirectory ( )
-
-            const dirname = justNeedEntry ? filename : path.dirname ( filename )
-
-            const stat1 = justNeedEntry ? stat0 : fs.statSync ( dirname, {
-                throwIfNoEntry: false
-            } )
-
-            // find entry file
-            if ( stat1 && stat1.isDirectory ( ) ) {
-
-                const paths = filename.split ( '/' )
-
-                const filenameWithoutExtension = justNeedEntry ? 'index' : paths.pop ( )
-
-                const matchEntryRegExp = new RegExp ( `^${filenameWithoutExtension}\\.((\\w?js)|(ts\\w?))$` )
-
-                const entries = fs.readdirSync ( dirname )
-
-                for ( const entry of entries ) {
-
-                    if ( !matchEntryRegExp.test ( entry ) ) continue
-
-                    paths.push ( entry )
-
-                    specifier = 'file://' + paths.join ( '/' )
-
-                    break
-                }
-            }
-        }
-    }
+    specifier = directoryImportTransform ( specifier )
 
     if ( useCompatLoader ) {
 

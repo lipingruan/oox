@@ -67,7 +67,7 @@ async function readEnvFile ( filePath: string ) {
 
 
 
-export async function configure ( ) {
+export async function configure ( mergeEnv?: {[x: string]: any} ) {
 
     const env = Object.create ( null )
 
@@ -91,6 +91,8 @@ export async function configure ( ) {
 
         env.origin = env.origin.split ( ',' )
     }
+
+    if ( mergeEnv ) Object.assign ( env, mergeEnv )
 
     return env
 }
