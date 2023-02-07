@@ -1,7 +1,7 @@
 {
     "name": "oox",
     "private": true,
-    "version": "0.3.0-beta10",
+    "version": "0.3.0-beta11",
     "description": "Graceful NodeJS distributed application solution",
     "keywords": [
         "http",
