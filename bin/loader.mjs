@@ -187,14 +187,16 @@ function ooxRPCImportTransform ( originalSpecifier, specifier, parentURL ) {
 
     const { entryFile } = oox.config
 
+    const url = new URL ( specifier )
+
     const groupURL = entryFile.group ? new URL ( '/' + entryFile.group, 'file://' ) : null
 
     // OOX RPC Proxy URL generation
-    if ( !specifier.endsWith ( entryFile.path ) && groupURL && specifier.startsWith ( groupURL.href ) ) {
+    if ( !specifier.endsWith ( entryFile.path ) && groupURL && url.href.startsWith ( groupURL.href ) ) {
 
-        const subSpecifier = specifier.slice ( groupURL.href.length )
+        const subSpecifier = url.href.slice ( groupURL.href.length )
 
-        const matchResult = subSpecifier.match ( /^\/?([\w-]+)(\/index)?(\.m?js)?$/ )
+        const matchResult = subSpecifier.match ( /^\/?([\w-]+)(\/index)?(\.((\w?js)|(ts\w?)))?$/ )
 
         if ( matchResult ) {
 
@@ -304,16 +306,24 @@ export async function resolve ( specifier, context, defaultResolve ) {
 
     if ( !isFileURL ( specifier ) ) {
 
-        const { url } = defaultResolve ( specifier, context, defaultResolve )
+        try {
 
-        specifier = url
+            specifier = defaultResolve ( specifier, context, defaultResolve ).url
+        } catch ( error ) {
+
+            if ( !isFileURL ( parentURL ) ) throw error
+
+            const _specifier = directoryImportTransform ( new URL ( specifier, parentURL ).href )
+
+            if ( _specifier === specifier ) throw error
+
+            specifier = _specifier
+        }
     }
 
     const ooxRPCTransform = ooxRPCImportTransform ( originalSpecifier, specifier, parentURL )
 
     if ( ooxRPCTransform ) return ooxRPCTransform
-
-    specifier = directoryImportTransform ( specifier )
 
     if ( useCompatLoader ) {
 
