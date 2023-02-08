@@ -308,7 +308,7 @@ export async function resolve ( specifier, context, defaultResolve ) {
 
         try {
 
-            specifier = defaultResolve ( specifier, context, defaultResolve ).url
+            specifier =  ( await defaultResolve ( specifier, context, defaultResolve ) ).url
         } catch ( error ) {
 
             if ( !isFileURL ( parentURL ) ) throw error
