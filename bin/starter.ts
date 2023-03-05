@@ -78,6 +78,15 @@ export async function startup ( env?: {[x: string]: any}, entryFilename?: string
         group: entryFile.group.replace ( /\\/g, '/' ),
     }
 
+
+
+    // 模块配置
+    oox.modules.setConfig ( oox.config )
+
+    oox.emit ( 'app:configured' )
+
+
+
     // 代理<服务间调用>
     if ( env.group ) {
 
@@ -88,24 +97,17 @@ export async function startup ( env?: {[x: string]: any}, entryFilename?: string
         proxyGroup ( entryFile.group, excludes )
     }
 
-    // 加载服务
-    await loadEntry ( entryFile.name, entryFile.path )
-
-
-
-    // 模块配置
-    oox.modules.setConfig ( oox.config )
-
-    oox.emit ( 'app:configured' )
-
-    const { http: { config: httpConfig }, socketio: { config: socketioConfig } } = oox.modules.builtins
-
-
-
     // 服务启动
     await oox.serve ( )
 
+    // 加载服务
+    await loadEntry ( entryFile.name, entryFile.path )
+
     oox.emit ( 'app:served' )
+
+
+
+    const { http: { config: httpConfig }, socketio: { config: socketioConfig } } = oox.modules.builtins
 
     console.log ( )
     console.log ( 'Service', bold`${oox.config.name}`, 'running.' )
