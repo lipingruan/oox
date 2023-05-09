@@ -189,7 +189,7 @@ function ooxRPCImportTransform ( originalSpecifier, specifier, parentURL ) {
 
     const url = new URL ( specifier )
 
-    const groupURL = entryFile.group ? new URL ( '/' + entryFile.group, 'file://' ) : null
+    const groupURL = entryFile.group ? new URL ( 'file://' + path.resolve ( '/', entryFile.group ) ) : null
 
     // OOX RPC Proxy URL generation
     if ( !specifier.endsWith ( entryFile.path ) && groupURL && url.href.startsWith ( groupURL.href ) ) {
