@@ -25,7 +25,7 @@ if ( /(oox.*cli\.js)$/.test ( jsExecutionFilename ) ) {
         isStartup = false
 
         console.log ( )
-        console.log ( 'OOX Service' )
+        console.log ( 'OOX Service Engine' )
         console.log ( bold`version`, bold.green`${pkg.version}` )
         console.log ( underline`${pkg.homepage}` )
         console.log ( )
